@@ -105,7 +105,7 @@
 
 .image-modal__dialog {
   position: relative;
-  width: min(640px, 95dvw);
+  width: min(640px, 95vw);
   max-height: 90vh;
   background: var(--background);
   border-radius: var(--radius-xl);
@@ -163,7 +163,7 @@
 
 @media (max-width: 640px) {
   .image-modal__dialog {
-    width: 96dvw;
+    width: 96vw;
     border-radius: var(--radius-lg);
   }
 

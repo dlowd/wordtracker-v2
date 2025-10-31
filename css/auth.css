@@ -21,7 +21,7 @@
 
 .auth-overlay__dialog {
   position: relative;
-  width: min(420px, 94dvw);
+  width: min(420px, 94vw);
   background: var(--background);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
