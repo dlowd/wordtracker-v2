@@ -88,15 +88,12 @@ body {
   color: var(--text-primary);
 }
 
-html,
-body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
+html {
+  box-sizing: border-box;
 }
 
 *, *::before, *::after {
-  box-sizing: border-box;
+  box-sizing: inherit;
 }
 
 img,

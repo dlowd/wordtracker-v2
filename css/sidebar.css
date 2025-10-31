@@ -46,6 +46,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-3);
+  flex-wrap: wrap;
   padding: var(--space-2) 0;
   border-bottom: 1px solid rgba(17, 24, 39, 0.06);
 }
@@ -78,17 +79,36 @@
 
 .stat-card__value {
   margin: 0;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-width: 0;
   font-size: 0.95rem;
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   text-align: right;
   line-height: 1.2;
+  word-break: break-word;
 }
 
 .stat-card--success .stat-card__value {
   color: var(--green-600);
   font-weight: var(--font-weight-bold);
+}
+
+@media (max-width: 480px) {
+  .stat-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .stat-card__label::after {
+    content: none;
+  }
+
+  .stat-card__value {
+    width: 100%;
+    text-align: left;
+  }
 }
 
 .action-list {
