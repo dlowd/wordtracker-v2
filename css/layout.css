@@ -58,9 +58,10 @@
   font-size: var(--font-size-display-md);
   font-weight: var(--font-weight-bold);
   color: inherit;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .header-actions {
