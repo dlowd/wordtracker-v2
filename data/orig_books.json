@@ -1,0 +1,16 @@
+[
+  { "title": "The Metamorphosis", "author": "Franz Kafka", "words": 22000 },
+  { "title": "The Old Man and the Sea", "author": "Ernest Hemingway", "words": 27000 },
+  { "title": "A Christmas Carol", "author": "Charles Dickens", "words": 29000 },
+  { "title": "Of Mice and Men", "author": "John Steinbeck", "words": 30000 },
+  { "title": "Animal Farm", "author": "George Orwell", "words": 30000 },
+  { "title": "The Hitchhiker's Guide to the Galaxy", "author": "Douglas Adams", "words": 46000 },
+  { "title": "Fahrenheit 451", "author": "Ray Bradbury", "words": 46000 },
+  { "title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "words": 47000 },
+  { "title": "Lord of the Flies", "author": "William Golding", "words": 59000 },
+  { "title": "The Catcher in the Rye", "author": "J. D. Salinger", "words": 73000 },
+  { "title": "Harry Potter and the Philosopher's Stone", "author": "J. K. Rowling", "words": 77000 },
+  { "title": "1984", "author": "George Orwell", "words": 88000 },
+  { "title": "The Hobbit", "author": "J. R. R. Tolkien", "words": 95000 },
+  { "title": "The Fellowship of the Ring", "author": "J. R. R. Tolkien", "words": 187000 }
+]

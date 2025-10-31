@@ -1,0 +1,98 @@
+.progress-summary {
+  background: linear-gradient(135deg, rgba(8, 145, 178, 0.08), rgba(214, 165, 116, 0.12));
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  border: 1px solid rgba(8, 145, 178, 0.15);
+}
+
+.progress-summary__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.progress-summary__label {
+  margin: 0;
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.progress-summary__value {
+  margin: 0;
+  font-size: var(--font-size-display-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--teal-700);
+}
+
+.progress-summary__bar {
+  width: 100%;
+}
+
+.progress-summary__bar-track {
+  position: relative;
+  width: 100%;
+  height: 0.875rem;
+  border-radius: var(--radius-md);
+  background: var(--gray-200);
+  overflow: hidden;
+}
+
+.progress-summary__bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: linear-gradient(90deg, var(--teal-500), var(--teal-700));
+  transition: width var(--transition-slow), transform var(--transition-fast);
+}
+
+.progress-summary__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-summary__words,
+.progress-summary__pace {
+  margin: 0;
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
+.progress-summary__pace--ahead {
+  color: var(--green-600);
+  font-weight: var(--font-weight-medium);
+}
+
+.progress-summary__pace--behind {
+  color: var(--orange-600);
+  font-weight: var(--font-weight-medium);
+}
+
+.progress-summary__pace--complete {
+  color: var(--teal-700);
+  font-weight: var(--font-weight-medium);
+}
+
+@media (max-width: 767px) {
+  .progress-summary {
+    margin-bottom: var(--space-3);
+  }
+
+  .progress-summary__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

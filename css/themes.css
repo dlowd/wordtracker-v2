@@ -1,0 +1,71 @@
+.theme-classic {
+  --teal-50: #f0f9ff;
+  --teal-100: #e0f2f7;
+  --teal-200: #b3e0ec;
+  --teal-300: #67d9f1;
+  --teal-500: #0891b2;
+  --teal-600: #0e7490;
+  --teal-700: #155e75;
+  --brown-500: #a68968;
+  --brown-700: #8b7355;
+  --surface: #f9fafb;
+  --background: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border: #e5e7eb;
+}
+
+.theme-emerald {
+  --teal-50: #ecfdf5;
+  --teal-100: #d1fae5;
+  --teal-200: #a7f3d0;
+  --teal-300: #6ee7b7;
+  --teal-500: #10b981;
+  --teal-600: #059669;
+  --teal-700: #047857;
+  --brown-500: #8b5cf6;
+  --brown-700: #6d28d9;
+  --surface: #f0fdf4;
+  --background: #ffffff;
+  --text-primary: #064e3b;
+  --text-secondary: #047857;
+  --border: #c4f1de;
+}
+
+.theme-midnight {
+  --teal-50: #1e293b;
+  --teal-100: #1e3a8a;
+  --teal-200: #1d4ed8;
+  --teal-300: #2563eb;
+  --teal-500: #38bdf8;
+  --teal-600: #0ea5e9;
+  --teal-700: #0284c7;
+  --brown-500: #6366f1;
+  --brown-700: #4f46e5;
+  --surface: #1e293b;
+  --background: #0f172a;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --border: #334155;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.4);
+  --shadow-md: 0 4px 10px rgba(15, 23, 42, 0.45);
+  --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.5);
+  --shadow-xl: 0 20px 45px rgba(15, 23, 42, 0.55);
+}
+
+.theme-sunset {
+  --teal-50: #fff7ed;
+  --teal-100: #ffedd5;
+  --teal-200: #fed7aa;
+  --teal-300: #fdba74;
+  --teal-500: #f97316;
+  --teal-600: #ea580c;
+  --teal-700: #c2410c;
+  --brown-500: #fb7185;
+  --brown-700: #f43f5e;
+  --surface: #fff7ed;
+  --background: #fffffb;
+  --text-primary: #7c2d12;
+  --text-secondary: #9a3412;
+  --border: #fed7aa;
+}

@@ -1,0 +1,22 @@
+[
+  { "title": "Harrison Bergeron", "author": "Kurt Vonnegut", "words": 2194 },
+  { "title": "The Lottery", "author": "Shirley Jackson", "words": 3378 },
+  { "title": "The Ugly Duckling", "author": "Hans Christian Andersen", "words": 3774 },
+  { "title": "Rip Van Winkle", "author": "Washington Irving", "words": 7569 },
+  { "title": "The Little Mermaid", "author": "Hans Christian Andersen", "words": 9000 },
+  { "title": "The Legend of Sleepy Hollow", "author": "Washington Irving", "words": 11928 },
+  { "title": "The Little Prince", "author": "Antoine de Saint-Exupéry", "words": 16534 },
+  { "title": "The Metamorphosis", "author": "Franz Kafka", "words": 21810 },
+  { "title": "The Pearl", "author": "John Steinbeck", "words": 25845 },
+  { "title": "A Christmas Carol", "author": "Charles Dickens", "words": 29000 },
+  { "title": "The Time Machine", "author": "H. G. Wells", "words": 32059 },
+  { "title": "The Lion, the Witch and the Wardrobe", "author": "C. S. Lewis", "words": 36363 },
+  { "title": "The Hitchhiker’s Guide to the Galaxy", "author": "Douglas Adams", "words": 46333 },
+  { "title": "A Wrinkle in Time", "author": "Madeleine L’Engle", "words": 49965 },
+  { "title": "Lord of the Flies", "author": "William Golding", "words": 59000 },
+  { "title": "The Catcher in the Rye", "author": "J. D. Salinger", "words": 73000 },
+  { "title": "Harry Potter and the Philosopher’s Stone", "author": "J. K. Rowling", "words": 77000 },
+  { "title": "1984", "author": "George Orwell", "words": 88000 },
+  { "title": "The Hobbit", "author": "J. R. R. Tolkien", "words": 95000 },
+  { "title": "The Fellowship of the Ring", "author": "J. R. R. Tolkien", "words": 187000 }
+]

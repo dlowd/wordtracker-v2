@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Word Tracker</title>
+  <script type="module" crossorigin src="/assets/index-BmvZ1KRL.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-jY7lKFJW.css">
+</head>
+<body class="theme-classic" data-feature-new-layout="false">
+  <div id="app" class="app-shell" inert aria-hidden="true">
+    <div id="new-layout" class="layout-container" hidden>
+      <header class="app-header" aria-label="Project header">
+        <div class="header-top">
+          <div class="header-left">
+            <h1 class="project-name" data-project-name>My Novel</h1>
+          </div>
+          <div class="header-actions">
+            <p class="day-indicator" data-day-progress>Day 12 of 30</p>
+            <button type="button" class="settings-button" aria-label="Open settings" data-settings-trigger>
+              Settings
+            </button>
+          </div>
+        </div>
+        <div class="header-meta">
+          <div class="auth-display header-meta__auth" data-auth-display hidden>
+            <span class="header-meta__label">Signed in as</span>
+            <span class="header-meta__user" data-auth-user></span>
+            <button type="button" class="link-button header-meta__logout" data-auth-logout>
+              Log out
+            </button>
+          </div>
+        </div>
+      </header>
+      <section class="word-entry-section" aria-label="Word entry section">
+        <div class="word-entry" data-word-entry hidden>
+          <header class="word-entry__header">
+            <h2 class="word-entry__title">Log Your Progress</h2>
+            <p class="word-entry__subtitle">Add today’s words or update your total.</p>
+          </header>
+          <form class="word-entry__form" data-word-entry-form novalidate>
+            <div class="word-entry__controls">
+              <label class="form-field">
+                <span class="form-field__label">Mode</span>
+                <select name="entryMode" class="form-field__select" aria-label="Word entry mode" data-entry-mode>
+                  <option value="add" selected>Add words</option>
+                  <option value="set">Set total</option>
+                </select>
+              </label>
+              <label class="form-field">
+                <span class="form-field__label">Word count</span>
+                <input
+                  type="number"
+                  name="wordCount"
+                  class="form-field__input"
+                  placeholder="0"
+                  step="1"
+                  inputmode="numeric"
+                  data-word-count
+                >
+              </label>
+            </div>
+            <div class="word-entry__actions">
+              <button type="submit" class="button button--primary" data-update-button>
+                Update Words
+              </button>
+              <button type="button" class="button button--secondary" data-undo-button>
+                Undo Last
+              </button>
+            </div>
+          </form>
+          <p class="word-entry__status" role="status" aria-live="polite" data-entry-status>
+            Enter your words to see progress updates here.
+          </p>
+        </div>
+      </section>
+      <div class="main-dashboard">
+        <aside class="sidebar" aria-label="Sidebar and actions">
+          <section class="sidebar__section sidebar__stats" aria-label="Progress stats">
+            <header class="sidebar__section-header">
+              <h2 class="sidebar__section-title">Progress Overview</h2>
+            </header>
+            <div class="stat-list" data-stat-list>
+              <article class="stat-card" data-stat-id="totalWords">
+                <p class="stat-card__label">Total Words</p>
+                <p class="stat-card__value" data-stat-value>0</p>
+              </article>
+              <article class="stat-card" data-stat-id="wordsToday">
+                <p class="stat-card__label">Words Today</p>
+                <p class="stat-card__value" data-stat-value>0</p>
+              </article>
+              <article class="stat-card" data-stat-id="wordsPerDay">
+                <p class="stat-card__label">Words Per Day Required</p>
+                <p class="stat-card__value" data-stat-value>1,667</p>
+              </article>
+              <article class="stat-card stat-card--optional" data-stat-id="averageWords" hidden>
+                <p class="stat-card__label">Average Words/Day</p>
+                <p class="stat-card__value" data-stat-value>0</p>
+              </article>
+              <article class="stat-card stat-card--optional" data-stat-id="percentage" hidden>
+                <p class="stat-card__label">Percentage</p>
+                <p class="stat-card__value" data-stat-value>0%</p>
+              </article>
+              <article class="stat-card stat-card--optional" data-stat-id="wordsRemaining" hidden>
+                <p class="stat-card__label">Words Remaining</p>
+                <p class="stat-card__value" data-stat-value>50,000</p>
+              </article>
+              <article class="stat-card stat-card--optional" data-stat-id="bestDay" hidden>
+                <p class="stat-card__label">Best Day</p>
+                <p class="stat-card__value" data-stat-value>—</p>
+              </article>
+              <article class="stat-card stat-card--optional" data-stat-id="currentStreak" hidden>
+                <p class="stat-card__label">Current Streak</p>
+                <p class="stat-card__value" data-stat-value>0 days</p>
+              </article>
+              <article class="stat-card stat-card--optional" data-stat-id="projectedFinish" hidden>
+                <p class="stat-card__label">Projected Finish</p>
+                <p class="stat-card__value" data-stat-value>—</p>
+              </article>
+            </div>
+          </section>
+          <section class="sidebar__section sidebar__rewards" data-reward-section hidden aria-label="Daily reward">
+            <header class="sidebar__section-header">
+              <h2 class="sidebar__section-title">Daily Reward</h2>
+            </header>
+            <article class="reward-card" data-reward-card hidden>
+              <button type="button" class="reward-card__media" data-reward-image-trigger>
+                <img data-reward-image alt="Daily reward" hidden>
+              </button>
+              <div class="reward-card__content">
+                <p class="reward-card__message" data-reward-message>Stay on pace to unlock today’s kitten.</p>
+                <button type="button" class="link-button reward-card__gallery" data-reward-gallery-trigger>
+                  View reward gallery
+                </button>
+              </div>
+            </article>
+          </section>
+          <section class="sidebar__section sidebar__actions" aria-label="Quick actions">
+            <header class="sidebar__section-header">
+              <h2 class="sidebar__section-title">Quick Actions</h2>
+            </header>
+            <ul class="action-list">
+              <li class="action-list__item">
+                <button type="button" class="link-button" data-action="export">
+                  Export data
+                </button>
+              </li>
+              <li class="action-list__item">
+                <button type="button" class="link-button" data-action="import">
+                  Import data
+                </button>
+              </li>
+              <li class="action-list__item">
+                <button type="button" class="link-button" data-action="settings" data-settings-trigger>
+                  Customize stats
+                </button>
+              </li>
+              <li class="action-list__item">
+                <button type="button" class="link-button" data-action="dev-edit" hidden>
+                  Edit word entries
+                </button>
+              </li>
+              <li class="action-list__item">
+                <button type="button" class="link-button" data-action="manage-rewards" hidden>
+                  Manage rewards (dev)
+                </button>
+              </li>
+              <li class="action-list__item">
+                <button type="button" class="link-button action-list__item--danger" data-action="reset">
+                  Reset all data
+                </button>
+              </li>
+            </ul>
+          </section>
+        </aside>
+        <section class="graph-area" aria-label="Graph area">
+          <section class="progress-summary" aria-label="Progress summary" data-progress-summary>
+            <div class="progress-summary__header">
+              <p class="progress-summary__label">Overall Progress</p>
+              <p class="progress-summary__value" data-progress-percentage>0%</p>
+            </div>
+            <div class="progress-summary__bar" role="img" aria-label="Progress toward word count goal">
+              <div class="progress-summary__bar-track">
+                <div class="progress-summary__bar-fill" data-progress-bar style="width: 0%;"></div>
+              </div>
+            </div>
+            <div class="progress-summary__footer">
+              <p class="progress-summary__words" data-progress-words>0 / 50,000 words</p>
+              <p class="progress-summary__pace" data-progress-pace>On track ✓</p>
+            </div>
+          </section>
+          <section class="graph-visual" aria-label="Word count graph" data-graph>
+            <canvas class="graph-visual__canvas" data-graph-canvas role="img" aria-label="Word count trend"></canvas>
+            <div class="graph-visual__fallback" data-graph-placeholder>
+              <p class="graph-visual__message">
+                Graph visualization coming soon.
+              </p>
+              <p class="graph-visual__hint">
+                Word totals will appear here once the chart integration is complete.
+              </p>
+            </div>
+          </section>
+          <section class="book-comparisons" data-book-comparisons hidden aria-label="Book comparisons">
+            <div class="book-comparisons__header">
+              <h2 class="book-comparisons__title">Book Comparisons</h2>
+            </div>
+            <p class="book-comparisons__empty" data-book-comparisons-empty>
+              Keep writing to unlock literary milestones.
+            </p>
+            <ul class="book-comparisons__list" data-book-comparisons-list></ul>
+            <p class="book-comparisons__next" data-book-comparisons-next hidden></p>
+          </section>
+        </section>
+      </div>
+    </div>
+  </div>
+  <div class="auth-overlay" data-auth-overlay hidden>
+    <div class="auth-overlay__backdrop"></div>
+    <div class="auth-overlay__dialog" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+      <div class="auth-overlay__header">
+        <p class="auth-overlay__brand">Word Tracker</p>
+        <h2 id="auth-modal-title" class="auth-overlay__title">Sign in to continue</h2>
+        <p class="auth-overlay__subtitle">
+          Enter your email address to receive a magic link. You’ll be able to pick up right where you left off.
+        </p>
+      </div>
+      <form class="auth-form" data-auth-form novalidate>
+        <label class="auth-form__field">
+          <span class="auth-form__label">Email address</span>
+          <input
+            type="email"
+            class="auth-form__input"
+            name="email"
+            placeholder="you@example.com"
+            required
+            autocomplete="email"
+            data-auth-email
+          >
+        </label>
+        <button type="submit" class="button button--primary auth-form__submit">
+          Send magic link
+        </button>
+        <p class="auth-form__feedback" data-auth-feedback aria-live="polite"></p>
+      </form>
+      <p class="auth-overlay__footer">
+        Need access? Contact the project owner to be added to the beta.
+      </p>
+    </div>
+  </div>
+  <div class="settings-modal" data-settings-modal hidden>
+    <div class="settings-modal__backdrop" data-settings-dismiss></div>
+    <div class="settings-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+      <header class="settings-modal__header">
+        <h2 id="settings-modal-title" tabindex="-1">Settings</h2>
+        <button type="button" class="settings-modal__close" aria-label="Close settings" data-settings-dismiss>&times;</button>
+      </header>
+      <div class="settings-modal__body">
+        <section class="settings-section">
+          <h3 class="settings-section__title">Project Settings</h3>
+          <form class="settings-section__content" data-project-form>
+            <label class="settings-field">
+              <span class="settings-field__label">Project Name</span>
+              <input type="text" class="settings-field__input" data-project-name name="projectName" placeholder="My Novel" required>
+            </label>
+            <div class="settings-field settings-field--split">
+              <label class="settings-field">
+                <span class="settings-field__label">Start Date</span>
+                <input type="date" class="settings-field__input" data-project-start name="startDate" required>
+              </label>
+              <label class="settings-field">
+                <span class="settings-field__label">End Date</span>
+                <input type="date" class="settings-field__input" data-project-end name="endDate" required>
+              </label>
+            </div>
+            <label class="settings-field">
+              <span class="settings-field__label">Goal (words)</span>
+              <input type="number" class="settings-field__input" data-project-goal name="goal" min="1" step="1" placeholder="50000" required>
+            </label>
+            <div class="settings-form-actions">
+              <button type="submit" class="button button--primary" data-project-save>Save project</button>
+              <span class="settings-form-feedback" data-project-feedback aria-live="polite"></span>
+            </div>
+          </form>
+        </section>
+        <section class="settings-section">
+          <h3 class="settings-section__title">Theme</h3>
+          <div class="settings-section__content">
+            <label class="settings-field">
+              <span class="settings-field__label">Color theme</span>
+              <select class="settings-field__input" data-theme-select aria-label="Select color theme">
+                <option value="classic">Classic</option>
+                <option value="emerald">Emerald</option>
+                <option value="midnight">Midnight</option>
+                <option value="sunset">Sunset</option>
+              </select>
+            </label>
+          </div>
+        </section>
+        <section class="settings-section">
+          <h3 class="settings-section__title">Display Options</h3>
+          <fieldset class="settings-section__content" data-stat-checkboxes>
+            <legend class="settings-section__legend">Optional Stats</legend>
+            <label class="settings-checkbox">
+              <input type="checkbox" data-stat-toggle="averageWords" checked>
+              <span>Average Words/Day</span>
+            </label>
+            <label class="settings-checkbox">
+              <input type="checkbox" data-stat-toggle="wordsRemaining" checked>
+              <span>Words Remaining</span>
+            </label>
+            <label class="settings-checkbox">
+              <input type="checkbox" data-stat-toggle="bestDay" checked>
+              <span>Best Day</span>
+            </label>
+            <label class="settings-checkbox">
+              <input type="checkbox" data-stat-toggle="currentStreak" checked>
+              <span>Current Streak</span>
+            </label>
+            <label class="settings-checkbox">
+              <input type="checkbox" data-stat-toggle="projectedFinish" checked>
+              <span>Projected Finish</span>
+            </label>
+            <label class="settings-checkbox">
+              <input type="checkbox" data-stat-toggle="percentage" checked>
+              <span>Completion Percentage</span>
+            </label>
+          </fieldset>
+        </section>
+        <section class="settings-section">
+          <h3 class="settings-section__title">Features</h3>
+          <div class="settings-section__content">
+            <label class="settings-checkbox">
+              <input type="checkbox" data-feature-toggle="rewardsSystem" checked>
+              <span>Daily Rewards (kitten gallery)</span>
+            </label>
+            <label class="settings-checkbox">
+              <input type="checkbox" data-feature-toggle="bookComparisons" checked>
+              <span>Book Comparisons</span>
+            </label>
+            <label class="settings-checkbox">
+              <input type="checkbox" data-feature-toggle="devFeatures">
+              <span>Development Tools</span>
+            </label>
+          </div>
+        </section>
+      </div>
+      <footer class="settings-modal__footer">
+        <button type="button" class="button button--secondary" data-settings-dismiss>Close</button>
+      </footer>
+    </div>
+  </div>
+  <div class="entries-modal" data-entries-modal hidden>
+    <div class="entries-modal__backdrop" data-entries-dismiss></div>
+    <div class="entries-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="entries-modal-title">
+      <header class="entries-modal__header">
+        <h2 id="entries-modal-title" tabindex="-1">Daily Word Entries</h2>
+        <button type="button" class="entries-modal__close" aria-label="Close editor" data-entries-dismiss>&times;</button>
+      </header>
+      <div class="entries-modal__body">
+        <p class="entries-modal__intro">Adjust each day’s total words added. Saving will append the necessary corrections.</p>
+        <div class="entries-grid" data-entries-grid></div>
+        <p class="entries-modal__hint">Totals are per day. Negative numbers remove words; positive numbers add them.</p>
+      </div>
+      <footer class="entries-modal__footer">
+        <button type="button" class="button button--secondary" data-entries-dismiss>Cancel</button>
+        <button type="button" class="button button--primary" data-entries-save>Save changes</button>
+      </footer>
+    </div>
+  </div>
+  <div class="gallery-modal" data-reward-gallery-modal hidden>
+    <div class="gallery-modal__backdrop" data-gallery-dismiss></div>
+    <div class="gallery-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="reward-gallery-title">
+      <header class="gallery-modal__header">
+        <h2 id="reward-gallery-title" tabindex="-1">Reward Gallery</h2>
+        <button type="button" class="gallery-modal__close" aria-label="Close reward gallery" data-gallery-dismiss>&times;</button>
+      </header>
+      <div class="gallery-modal__body">
+        <p class="gallery-modal__empty" data-gallery-empty>No rewards yet. Keep writing to unlock kittens!</p>
+        <div class="gallery-grid" data-gallery-grid></div>
+      </div>
+      <footer class="gallery-modal__footer">
+        <button type="button" class="button button--secondary" data-gallery-dismiss>Close</button>
+      </footer>
+    </div>
+  </div>
+  <div class="rewards-modal" data-rewards-admin-modal hidden>
+    <div class="rewards-modal__backdrop" data-rewards-admin-dismiss></div>
+    <div class="rewards-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="rewards-admin-title">
+      <header class="rewards-modal__header">
+        <h2 id="rewards-admin-title" tabindex="-1">Manage Rewards</h2>
+        <button type="button" class="rewards-modal__close" aria-label="Close rewards manager" data-rewards-admin-dismiss>&times;</button>
+      </header>
+      <div class="rewards-modal__body">
+        <form class="rewards-form" data-rewards-admin-form>
+          <div class="rewards-form__fields">
+            <label class="rewards-form__field">
+              <span class="rewards-form__label">Reward date</span>
+              <input type="date" data-admin-reward-date required>
+            </label>
+            <label class="rewards-form__field">
+              <span class="rewards-form__label">Reward image</span>
+              <select data-admin-reward-select required></select>
+            </label>
+            <label class="rewards-form__field">
+              <span class="rewards-form__label">Message (optional)</span>
+              <textarea rows="2" data-admin-reward-message placeholder="Use default message"></textarea>
+            </label>
+          </div>
+          <div class="rewards-form__actions">
+            <button type="submit" class="button button--primary">Save reward</button>
+            <button type="button" class="button button--secondary" data-admin-reward-default>Use default message</button>
+          </div>
+        </form>
+        <div class="rewards-admin__empty" data-rewards-admin-empty hidden>No rewards stored yet.</div>
+        <div class="rewards-admin__list" data-rewards-admin-list></div>
+      </div>
+      <footer class="rewards-modal__footer">
+        <button type="button" class="button button--secondary" data-rewards-admin-dismiss>Close</button>
+      </footer>
+    </div>
+  </div>
+  <div class="image-modal" data-image-modal hidden>
+    <div class="image-modal__backdrop" data-image-modal-dismiss></div>
+    <div class="image-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="image-modal-title">
+      <header class="image-modal__header">
+        <h2 id="image-modal-title" tabindex="-1" data-image-modal-title>Reward preview</h2>
+        <button type="button" class="image-modal__close" aria-label="Close image preview" data-image-modal-dismiss>&times;</button>
+      </header>
+      <div class="image-modal__body">
+        <img data-image-modal-picture alt="Reward preview">
+        <p class="image-modal__caption" data-image-modal-caption></p>
+      </div>
+      <footer class="image-modal__footer">
+        <button type="button" class="button button--secondary" data-image-modal-dismiss>Close</button>
+      </footer>
+    </div>
+  </div>
+  <input type="file" data-import-input hidden accept="application/json">
+</body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+</html>
