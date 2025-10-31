@@ -20,7 +20,7 @@
 
 .gallery-modal__dialog {
   position: relative;
-  width: min(800px, 94vw);
+  width: min(800px, 94dvw);
   max-height: 92vh;
   background: var(--background);
   border-radius: var(--radius-xl);
@@ -136,7 +136,7 @@
 
 @media (max-width: 640px) {
   .gallery-modal__dialog {
-    width: 96vw;
+    width: 96dvw;
     border-radius: var(--radius-lg);
   }
 

@@ -20,7 +20,7 @@
 
 .entries-modal__dialog {
   position: relative;
-  width: min(640px, 95vw);
+  width: min(640px, 95dvw);
   max-height: 92vh;
   background: var(--background);
   border-radius: var(--radius-xl);
@@ -116,7 +116,7 @@
 
 @media (max-width: 640px) {
   .entries-modal__dialog {
-    width: 96vw;
+    width: 96dvw;
     border-radius: var(--radius-lg);
   }
 
@@ -152,7 +152,7 @@
 
 .rewards-modal__dialog {
   position: relative;
-  width: min(720px, 95vw);
+  width: min(720px, 95dvw);
   max-height: 92vh;
   background: var(--background);
   border-radius: var(--radius-xl);
@@ -324,7 +324,7 @@
 
 @media (max-width: 640px) {
   .rewards-modal__dialog {
-    width: 96vw;
+    width: 96dvw;
     border-radius: var(--radius-lg);
   }
 

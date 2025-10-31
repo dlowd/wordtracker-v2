@@ -20,7 +20,7 @@
 
 .settings-modal__dialog {
   position: relative;
-  width: min(640px, 94vw);
+  width: min(640px, 94dvw);
   max-height: 90vh;
   background: var(--background);
   border-radius: var(--radius-xl);
@@ -178,7 +178,7 @@
 
 @media (max-width: 640px) {
   .settings-modal__dialog {
-    width: 96vw;
+    width: 96dvw;
     border-radius: var(--radius-lg);
   }
 
