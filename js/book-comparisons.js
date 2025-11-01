@@ -318,7 +318,7 @@ export class BookComparisonsController {
     }
     this.nextTargetEl.removeAttribute('hidden');
     this.nextTargetEl.innerHTML = `
-      Keep going! Next up: <strong>${nextTarget.title}</strong> at ${nextTarget.words.toLocaleString()} words.
+      Keep going! Next up: <strong>${nextTarget.title}</strong> by ${nextTarget.author} at ${nextTarget.words.toLocaleString()} words.
     `;
   }
 
@@ -347,7 +347,7 @@ export class BookComparisonsController {
       if (nextTarget) {
         this.modalNextTargetEl.removeAttribute('hidden');
         this.modalNextTargetEl.innerHTML = `
-          Keep going! Next up: <strong>${nextTarget.title}</strong> at ${nextTarget.words.toLocaleString()} words.
+          Keep going! Next up: <strong>${nextTarget.title}</strong> by ${nextTarget.author} at ${nextTarget.words.toLocaleString()} words.
         `;
       } else if (passedBooks.length) {
         this.modalNextTargetEl.removeAttribute('hidden');
