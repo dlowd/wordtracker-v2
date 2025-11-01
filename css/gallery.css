@@ -127,13 +127,6 @@
   color: var(--text-secondary);
 }
 
-.gallery-card__message {
-  margin: 0;
-  font-size: var(--font-size-label);
-  color: var(--text-secondary);
-  text-align: center;
-}
-
 @media (max-width: 640px) {
   .gallery-modal__dialog {
     width: 96vw;

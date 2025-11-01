@@ -17,14 +17,11 @@ import { getDateKey, startOfDay, addDays, parseDateInput, parseDateKey } from '.
 import { buildBackupPayload, triggerBackupDownload, readBackupFile, validateBackupPayload, BACKUP_VERSION } from './data-backup.js';
 import { getRewardCatalog } from './rewards-manifest.js';
 import {
-  getProjectRewards as getStoredProjectRewards,
-  getTodayReward,
   evaluateTodayReward,
   getRewardsStore,
   setRewardsStore,
   setRewardForDate,
-  removeRewardForDate,
-  replaceProjectRewards
+  removeRewardForDate
 } from './rewards.js';
 import initRewardsGallery from './rewards-gallery.js';
 
@@ -38,7 +35,6 @@ const selectors = {
   rewardSection: '[data-reward-section]',
   rewardCard: '[data-reward-card]',
   rewardImage: '[data-reward-image]',
-  rewardMessage: '[data-reward-message]',
   rewardEmpty: '[data-reward-empty]',
   rewardGalleryTrigger: '[data-reward-gallery-trigger]'
 };
@@ -97,8 +93,6 @@ const rewardsAdminState = {
 let currentRewardToday = null;
 let currentImageModalReward = null;
 let remotePreferencesSupportsTheme = true;
-const REWARD_HISTORY_TABLE = 'reward_history';
-let remoteRewardsSupported = true;
 
 const preferenceCache = getPreferences();
 const rewardCatalog = getRewardCatalog();
@@ -205,7 +199,6 @@ const importInput = document.querySelector('[data-import-input]');
 const rewardSection = document.querySelector(selectors.rewardSection);
 const rewardCard = document.querySelector(selectors.rewardCard);
 const rewardImage = document.querySelector(selectors.rewardImage);
-const rewardMessageEl = document.querySelector(selectors.rewardMessage);
 const rewardEmptyState = document.querySelector(selectors.rewardEmpty);
 const rewardGalleryTrigger = document.querySelector(selectors.rewardGalleryTrigger);
 const rewardsGalleryModal = document.querySelector('[data-reward-gallery-modal]');
@@ -537,70 +530,8 @@ const chunkArray = (items, size) => {
   return chunks;
 };
 
-const syncRewardsCollectionToSupabase = async (projectId) => {
-  if (!supabase || !authUser || !projectId || !remoteRewardsSupported) {
-    return;
-  }
-
-  try {
-    const { error: deleteError } = await supabase
-      .from(REWARD_HISTORY_TABLE)
-      .delete()
-      .eq('project_id', projectId);
-
-    if (handleRewardsTableError(deleteError, 'reset')) {
-      return;
-    }
-    if (deleteError) {
-      throw deleteError;
-    }
-
-    const rewards = getStoredProjectRewards(projectId);
-    if (!rewards.length) {
-      return;
-    }
-
-    const rows = rewards.map((reward) => {
-      if (!reward?.id || !reward?.date) {
-        return null;
-      }
-      const manifest = rewardCatalogMap.get(reward.id) || null;
-      const unlocked =
-        reward.unlockedAt ||
-        reward.unlocked_at ||
-        (reward.date ? new Date(`${reward.date}T00:00:00Z`).toISOString() : new Date().toISOString());
-      return sanitizeRewardPayload({
-        project_id: projectId,
-        reward_date: reward.date,
-        reward_id: reward.id,
-        reward_pack: reward.pack || manifest?.pack || 'kitten',
-        message:
-          reward.message !== undefined
-            ? reward.message
-            : manifest?.message ?? null,
-        unlocked_at: unlocked
-      });
-    }).filter(Boolean);
-
-    if (!rows.length) {
-      return;
-    }
-
-    const chunks = chunkArray(rows, 500);
-    for (const chunk of chunks) {
-      if (!chunk.length) continue;
-      const { error } = await supabase.from(REWARD_HISTORY_TABLE).insert(chunk);
-      if (handleRewardsTableError(error, 'save')) {
-        return;
-      }
-      if (error) {
-        throw error;
-      }
-    }
-  } catch (error) {
-    handleRewardsTableError(error, 'save');
-    throw error;
-  }
+const syncRewardsCollectionToSupabase = async () => {
+  return;
 };
 
 const syncBackupToSupabase = async (projectPayload, entries) => {
@@ -662,7 +593,7 @@ const syncBackupToSupabase = async (projectPayload, entries) => {
       }
     }
 
-    await syncRewardsCollectionToSupabase(projectId);
+    await syncRewardsCollectionToSupabase();
     await persistPreferences();
   } catch (error) {
     console.error('Unable to sync backup to Supabase.', error);
@@ -760,8 +691,6 @@ const applyBackupPayload = async (backup) => {
   }
 
   setRewardsStore(nextRewardsStore);
-  latestRewards = replaceProjectRewards(currentProject.id, aggregatedRewards);
-  updateRewardGalleryView(latestRewards);
 
   applyFeatureFlags();
   updateProjectMetrics();
@@ -856,10 +785,6 @@ const performFullReset = async () => {
           end_date: currentProject.endDate,
           updated_at: new Date().toISOString()
         }, { onConflict: 'id' });
-      await supabase
-        .from(REWARD_HISTORY_TABLE)
-        .delete()
-        .eq('project_id', currentProject.id);
       await supabase.from('preferences').delete().eq('user_id', authUser.id);
     } catch (error) {
       console.error('Unable to reset Supabase data.', error);
@@ -948,6 +873,14 @@ const setupDataManagementControls = () => {
       event.preventDefault();
       if (currentRewardToday && currentRewardToday.image) {
         openImageModal(currentRewardToday);
+      }
+    });
+    rewardImageTrigger.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+        if (currentRewardToday && currentRewardToday.image) {
+          event.preventDefault();
+          openImageModal(currentRewardToday);
+        }
       }
     });
   }
@@ -1187,14 +1120,9 @@ const openImageModal = (reward) => {
   }
   if (imageModalCaption) {
     const displayDate = resolveRewardDisplayDate(reward);
-    const segments = [];
-    if (displayDate) {
-      segments.push(`Unlocked ${rewardDateFormatter.format(displayDate)}.`);
-    }
-    if (reward.message) {
-      segments.push(reward.message);
-    }
-    imageModalCaption.textContent = segments.join(' ').trim();
+    imageModalCaption.textContent = displayDate
+      ? `Unlocked ${rewardDateFormatter.format(displayDate)}.`
+      : '';
   }
   imageModal.removeAttribute('hidden');
   imageModalTitle?.focus();
@@ -1261,13 +1189,15 @@ const renderRewardPlaceholder = () => {
 
   currentRewardToday = null;
   if (rewardImageTrigger) {
-    rewardImageTrigger.disabled = true;
     rewardImageTrigger.dataset.rewardId = '';
     rewardImageTrigger.dataset.rewardImage = '';
     rewardImageTrigger.dataset.rewardLabel = '';
     rewardImageTrigger.dataset.rewardMessage = '';
     rewardImageTrigger.dataset.rewardDate = '';
     rewardImageTrigger.dataset.rewardUnlocked = '';
+    rewardImageTrigger.setAttribute('aria-disabled', 'true');
+    rewardImageTrigger.removeAttribute('aria-label');
+    rewardImageTrigger.tabIndex = -1;
   }
 };
 
@@ -1280,7 +1210,7 @@ const renderRewardCard = (reward) => {
   if (rewardImage) {
     if (reward.image) {
       rewardImage.src = reward.image;
-      rewardImage.alt = reward.label || 'Daily reward image';
+      rewardImage.alt = reward.label || 'Milestone reward image';
       rewardImage.hidden = false;
       rewardImage.style.width = '100%';
       rewardImage.style.height = '100%';
@@ -1290,9 +1220,6 @@ const renderRewardCard = (reward) => {
       rewardImage.removeAttribute('src');
       rewardImage.removeAttribute('alt');
     }
-  }
-  if (rewardMessageEl) {
-    rewardMessageEl.textContent = reward.message || 'Keep writing to unlock more kittens!';
   }
   currentRewardToday = reward;
   if (rewardCard) {
@@ -1310,7 +1237,15 @@ const renderRewardCard = (reward) => {
     rewardImageTrigger.dataset.rewardMessage = reward.message || '';
     rewardImageTrigger.dataset.rewardDate = reward.date || '';
     rewardImageTrigger.dataset.rewardUnlocked = reward.unlockedAt || '';
-    rewardImageTrigger.disabled = !reward.image;
+    if (reward.image) {
+      rewardImageTrigger.setAttribute('aria-disabled', 'false');
+      rewardImageTrigger.setAttribute('aria-label', reward.label || reward.name || 'Milestone reward image');
+      rewardImageTrigger.tabIndex = 0;
+    } else {
+      rewardImageTrigger.setAttribute('aria-disabled', 'true');
+      rewardImageTrigger.removeAttribute('aria-label');
+      rewardImageTrigger.tabIndex = -1;
+    }
   }
 };
 
@@ -1322,154 +1257,7 @@ const updateRewardGalleryView = (rewards) => {
   }
 };
 
-const sanitizeRewardPayload = (payload = {}) => {
-  const result = {};
-  Object.entries(payload).forEach(([key, value]) => {
-    if (value !== undefined) {
-      result[key] = value;
-    }
-  });
-  return result;
-};
-
-const isRewardTableMissingError = (error) => {
-  if (!error) return false;
-  const code = String(error.code || '');
-  const missingCodes = new Set(['PGRST103', 'PGRST301', 'PGRST404', '42P01']);
-  if (missingCodes.has(code)) {
-    return true;
-  }
-  const message = String(error.message || '');
-  if (!message) {
-    return false;
-  }
-  const normalized = message.toLowerCase();
-  if (!normalized.includes('reward_history') && !normalized.includes(REWARD_HISTORY_TABLE)) {
-    return false;
-  }
-  return (
-    normalized.includes('does not exist') ||
-    normalized.includes('not exist') ||
-    normalized.includes('missing') ||
-    normalized.includes('undefined table')
-  );
-};
-
-const handleRewardsTableError = (error, context) => {
-  if (!error) {
-    return false;
-  }
-  if (isRewardTableMissingError(error)) {
-    if (remoteRewardsSupported) {
-      remoteRewardsSupported = false;
-      console.warn(
-        `Supabase reward sync disabled; '${REWARD_HISTORY_TABLE}' table is unavailable.`
-      );
-    }
-    return true;
-  }
-  console.error(`Unable to ${context} reward data`, error);
-  return false;
-};
-
-const persistRewardToSupabase = async (dateKey, reward) => {
-  if (
-    !supabase ||
-    !authUser ||
-    !currentProject?.id ||
-    !remoteRewardsSupported ||
-    !dateKey ||
-    !reward?.id
-  ) {
-    return;
-  }
-  const manifest = rewardCatalogMap.get(reward.id) || null;
-  const payload = sanitizeRewardPayload({
-    project_id: currentProject.id,
-    reward_date: dateKey,
-    reward_id: reward.id,
-    reward_pack: reward.pack || manifest?.pack || 'kitten',
-    message:
-      reward.message !== undefined
-        ? reward.message
-        : manifest?.message ?? null,
-    unlocked_at: reward.unlockedAt || new Date().toISOString()
-  });
-
-  try {
-    const { error } = await supabase
-      .from(REWARD_HISTORY_TABLE)
-      .upsert(payload, { onConflict: 'project_id,reward_date' });
-    handleRewardsTableError(error, 'save');
-  } catch (error) {
-    handleRewardsTableError(error, 'save');
-  }
-};
-
-const deleteRewardFromSupabase = async (dateKey) => {
-  if (
-    !supabase ||
-    !authUser ||
-    !currentProject?.id ||
-    !remoteRewardsSupported ||
-    !dateKey
-  ) {
-    return;
-  }
-  try {
-    const { error } = await supabase
-      .from(REWARD_HISTORY_TABLE)
-      .delete()
-      .eq('project_id', currentProject.id)
-      .eq('reward_date', dateKey);
-    handleRewardsTableError(error, 'delete');
-  } catch (error) {
-    handleRewardsTableError(error, 'delete');
-  }
-};
-
-const refreshRewardsFromSupabase = async () => {
-  if (
-    !supabase ||
-    !authUser ||
-    !currentProject?.id ||
-    !remoteRewardsSupported
-  ) {
-    return getStoredProjectRewards(currentProject?.id);
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from(REWARD_HISTORY_TABLE)
-      .select('*')
-      .eq('project_id', currentProject.id)
-      .order('reward_date', { ascending: true });
-
-    if (error) {
-      handleRewardsTableError(error, 'load');
-      return getStoredProjectRewards(currentProject.id);
-    }
-
-    if (!Array.isArray(data)) {
-      return getStoredProjectRewards(currentProject.id);
-    }
-
-    const normalized = data.map((row) => ({
-      id: row.reward_id || row.rewardId,
-      date: row.reward_date || row.rewardDate,
-      message:
-        row.message ?? row.reward_message ?? row.rewardMessage ?? null,
-      unlockedAt: row.unlocked_at || row.unlockedAt || null
-    }));
-
-    latestRewards = replaceProjectRewards(currentProject.id, normalized);
-    updateRewardGalleryView(latestRewards);
-    return latestRewards;
-  } catch (error) {
-    handleRewardsTableError(error, 'load');
-    return getStoredProjectRewards(currentProject?.id);
-  }
-};
+const refreshRewardsFromSupabase = async () => latestRewards;
 
 const isRewardsAdminOpen = () =>
   Boolean(rewardsAdminModal && !rewardsAdminModal.hasAttribute('hidden'));
@@ -1517,9 +1305,6 @@ const updateRewardsUI = (metrics = null) => {
       ? { ...result.reward, date: result.date }
       : result.reward;
     renderRewardCard(rewardForCard);
-    if (result.unlockedToday && result.date) {
-      void persistRewardToSupabase(result.date, result.reward);
-    }
   } else {
     renderRewardPlaceholder();
   }
@@ -1577,7 +1362,7 @@ const loadRewardIntoForm = (reward) => {
 
 const renderRewardsAdmin = () => {
   if (!rewardsAdminList) return;
-  const rewards = currentProject?.id ? getStoredProjectRewards(currentProject.id) : [];
+  const rewards = Array.isArray(latestRewards) ? latestRewards : [];
   rewardsAdminList.innerHTML = '';
 
   if (!rewards.length) {
@@ -1684,9 +1469,8 @@ const handleRewardsAdminSubmit = (event) => {
   try {
     if (rewardsAdminState.editingDate && rewardsAdminState.editingDate !== dateKey) {
       removeRewardForDate(currentProject.id, rewardsAdminState.editingDate);
-      void deleteRewardFromSupabase(rewardsAdminState.editingDate);
     }
-    const saved = setRewardForDate({
+    setRewardForDate({
       projectId: currentProject.id,
       dateKey,
       rewardId,
@@ -1694,7 +1478,6 @@ const handleRewardsAdminSubmit = (event) => {
     });
     renderRewardsAdmin();
     updateRewardsUI();
-    void persistRewardToSupabase(dateKey, saved);
     rewardsAdminState.editingDate = null;
   } catch (error) {
     console.error('Unable to save reward.', error);
@@ -1730,7 +1513,7 @@ const handleRewardsAdminListClick = (event) => {
   const editBtn = event.target.closest('[data-admin-reward-edit]');
   if (editBtn) {
     const dateKey = editBtn.dataset.adminRewardEdit;
-    const rewards = currentProject?.id ? getStoredProjectRewards(currentProject.id) : [];
+    const rewards = Array.isArray(latestRewards) ? latestRewards : [];
     const reward = rewards.find((item) => item.date === dateKey);
     if (reward) {
       loadRewardIntoForm(reward);
@@ -1745,7 +1528,6 @@ const handleRewardsAdminListClick = (event) => {
     const confirmDelete = window.confirm(`Remove reward for ${dateKey}?`);
     if (!confirmDelete) return;
     removeRewardForDate(currentProject?.id, dateKey);
-    void deleteRewardFromSupabase(dateKey);
     renderRewardsAdmin();
     updateRewardsUI();
   }
@@ -2702,7 +2484,6 @@ const applyAuthState = async (user) => {
     if (authFeedback) {
       authFeedback.textContent = '';
     }
-    remoteRewardsSupported = true;
     clearUserData();
     return;
   }
@@ -2712,7 +2493,6 @@ const applyAuthState = async (user) => {
   if (authFeedback) {
     authFeedback.textContent = '';
   }
-  remoteRewardsSupported = true;
   try {
     await loadUserData();
   } catch (error) {

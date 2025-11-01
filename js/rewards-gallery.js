@@ -118,7 +118,7 @@ export class RewardsGallery {
       if (reward.image) {
         const img = document.createElement('img');
         img.src = reward.image;
-        img.alt = reward.label || reward.name || 'Daily reward';
+        img.alt = reward.label || reward.name || 'Milestone reward';
         thumb.appendChild(img);
       } else {
         thumb.classList.add('gallery-card__thumb--empty');
@@ -132,13 +132,6 @@ export class RewardsGallery {
         date.className = 'gallery-card__date';
         date.textContent = dateFormatter.format(displayDate);
         card.appendChild(date);
-      }
-
-      if (reward.message) {
-        const message = document.createElement('p');
-        message.className = 'gallery-card__message';
-        message.textContent = reward.message;
-        card.appendChild(message);
       }
 
       this.grid.appendChild(card);

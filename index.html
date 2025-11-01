@@ -143,20 +143,23 @@
               </article>
             </div>
           </section>
-          <section class="sidebar__section sidebar__rewards" data-reward-section hidden aria-label="Daily reward">
+          <section class="sidebar__section sidebar__rewards" data-reward-section hidden aria-label="Milestone reward">
             <header class="sidebar__section-header">
-              <h2 class="sidebar__section-title">Daily Reward</h2>
+              <h2 class="sidebar__section-title">Milestone Reward</h2>
             </header>
             <article class="reward-card" data-reward-card hidden>
-              <button type="button" class="reward-card__media" data-reward-image-trigger>
-                <img data-reward-image alt="Daily reward" hidden>
+              <img
+                class="reward-card__image"
+                data-reward-image
+                data-reward-image-trigger
+                role="button"
+                tabindex="-1"
+                alt="Milestone reward"
+                hidden
+              >
+              <button type="button" class="link-button reward-card__gallery" data-reward-gallery-trigger>
+                View reward gallery
               </button>
-              <div class="reward-card__content">
-                <p class="reward-card__message" data-reward-message>Stay on pace to unlock today’s kitten.</p>
-                <button type="button" class="link-button reward-card__gallery" data-reward-gallery-trigger>
-                  View reward gallery
-                </button>
-              </div>
             </article>
           </section>
           <section class="sidebar__section sidebar__actions" aria-label="Quick actions">
@@ -357,7 +360,7 @@
           <div class="settings-section__content">
             <label class="settings-checkbox">
               <input type="checkbox" data-feature-toggle="rewardsSystem" checked>
-              <span>Daily Rewards (kitten gallery)</span>
+              <span>Milestone Rewards (kitten gallery)</span>
             </label>
             <label class="settings-checkbox">
               <input type="checkbox" data-feature-toggle="quickAddModal">
