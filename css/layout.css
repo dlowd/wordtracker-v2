@@ -104,7 +104,10 @@
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-medium);
   color: rgba(255, 255, 255, 0.8);
+  display: inline-flex;
+  gap: var(--space-4);
 }
+
 
 .settings-button {
   display: inline-flex;
@@ -151,16 +154,15 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: var(--font-weight-medium);
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(0, 0, 0, 0.65);
 }
 
 .header-meta__user {
   font-weight: var(--font-weight-semibold);
-  color: #f8fafc;
 }
 
 .header-meta__auth .link-button {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(0, 0, 0, 0.9);
 }
 
 .header-meta__auth .link-button:hover {

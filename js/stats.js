@@ -219,6 +219,14 @@ export const computeProjectMetrics = (snapshot, project, today = new Date()) => 
     }
   }
 
+  let dateString;
+  const now = new Date;
+  dateString = now.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+
   let headerLabel;
   if (dayPhase.phase === 'before') {
     const days = dayPhase.daysUntilStart || 0;
@@ -271,6 +279,7 @@ export const computeProjectMetrics = (snapshot, project, today = new Date()) => 
     requirementDays,
     highlightToday,
     dayPhase,
+    dateString,
     headerLabel,
     baselineDailyGoal,
     bestDayWords,

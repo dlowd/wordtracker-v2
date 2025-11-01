@@ -195,3 +195,17 @@
     grid-template-columns: 1fr;
   }
 }
+
+.auth-section {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.auth-section .button {
+  flex-shrink: 0;
+  width: auto;
+  display: inline-block;
+}

@@ -30,7 +30,11 @@
             <h1 class="project-name" data-project-name>My Novel</h1>
           </div>
           <div class="header-actions">
-            <p class="day-indicator" data-day-progress>Day 12 of 30</p>
+            <p class="day-indicator">
+              <span data-current-date>Nov 2, 2025</span>
+              <span class="separator">•</span>
+              <span data-day-progress>Day 12 of 30</span>
+            </p>
             <button
               type="button"
               class="quick-add-button"
@@ -46,15 +50,9 @@
           </div>
         </div>
         <div class="header-meta">
-          <div class="auth-display header-meta__auth" data-auth-display hidden>
-            <span class="header-meta__label">Signed in as</span>
-            <span class="header-meta__user" data-auth-user></span>
-            <button type="button" class="link-button header-meta__logout" data-auth-logout>
-              Log out
-            </button>
-          </div>
-        </div>
       <div class="quick-stats" data-quick-stats hidden aria-live="polite"></div>
+        </div>
+      </header>
       <section class="word-entry-section" aria-label="Word entry section">
         <div class="word-entry" data-word-entry hidden>
           <header class="word-entry__header">
@@ -97,7 +95,6 @@
 					</p> -->
         </div>
       </section>
-      </header>
       <div class="main-dashboard">
         <aside class="sidebar" aria-label="Sidebar and actions">
           <section class="sidebar__section sidebar__stats" aria-label="Progress stats">
@@ -359,8 +356,8 @@
           <h3 class="settings-section__title">Features</h3>
           <div class="settings-section__content">
             <label class="settings-checkbox">
-              <input type="checkbox" data-feature-toggle="rewardsSystem" checked>
-              <span>Milestone Rewards (kitten gallery)</span>
+              <input type="checkbox" data-feature-toggle="compactMode">
+              <span>Compact mode</span>
             </label>
             <label class="settings-checkbox">
               <input type="checkbox" data-feature-toggle="quickAddModal">
@@ -375,13 +372,22 @@
               <span>Book Comparisons</span>
             </label>
             <label class="settings-checkbox">
-              <input type="checkbox" data-feature-toggle="compactMode">
-              <span>Compact mode</span>
+              <input type="checkbox" data-feature-toggle="rewardsSystem" checked>
+              <span>Milestone Rewards (kitten gallery)</span>
             </label>
             <label class="settings-checkbox">
               <input type="checkbox" data-feature-toggle="devFeatures">
               <span>Development Tools</span>
             </label>
+          </div>
+        </section>
+        <section class="settings-section">
+          <h3 class="settings-section__title">Account</h3>
+          <div class="settings-section__content auth-section">
+            <span class="auth-user" data-auth-user></span>
+            <button type="button" class="button data-auth-logout" data-auth-logout>
+              Log out
+            </button>
           </div>
         </section>
       </div>

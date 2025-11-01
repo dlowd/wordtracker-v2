@@ -74,12 +74,14 @@ export class QuickStatsController {
       parts.push(`<span class="quick-stats__value">${paceText}</span>`);
     }
 
+          /*
     parts.push(`<span>${this.dateFormatter.format(new Date())}</span>`);
 
     const dayLabel = this.getDayLabel(metrics);
     if (dayLabel) {
       parts.push(`<span>${dayLabel}</span>`);
     }
+    */
 
     return parts
       .map((part) => `<span class="quick-stats__item">${part}</span>`)

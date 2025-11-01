@@ -28,6 +28,7 @@ import initRewardsGallery from './rewards-gallery.js';
 const selectors = {
   newLayoutRoot: '#new-layout',
   projectName: '[data-project-name]',
+  dateString: '[data-current-date]',
   dayProgress: '[data-day-progress]',
   settingsTrigger: '[data-settings-trigger]',
   wordEntry: '[data-word-entry]',
@@ -49,6 +50,11 @@ const ensureHeaderDefaults = () => {
     projectNameEl.textContent = currentProject.name || 'My Novel';
   }
 
+  const dateStringEl = document.querySelector(selectors.dateString);
+  if (dateStringEl && !dateStringEl.textContent.trim()) {
+    dateStringEl.textContent = 'Nov 1, 2025';
+  }
+
   const dayProgressEl = document.querySelector(selectors.dayProgress);
   if (dayProgressEl && !dayProgressEl.textContent.trim()) {
     dayProgressEl.textContent = 'Day 1 of 30';
@@ -60,6 +66,12 @@ const newLayoutAPI = {
     const el = document.querySelector(selectors.projectName);
     if (el) {
       el.textContent = name;
+    }
+  },
+  setDateString(label) {
+    const el = document.querySelector(selectors.dateString);
+    if (el) {
+      el.textContent = label;
     }
   },
   setDayProgress(label) {
@@ -189,7 +201,6 @@ const authForm = authOverlay?.querySelector('[data-auth-form]') || null;
 const authEmailInput = authOverlay?.querySelector('[data-auth-email]') || null;
 const authFeedback = authOverlay?.querySelector('[data-auth-feedback]') || null;
 const authSubmitButton = authForm?.querySelector('button[type="submit"]') || null;
-const authDisplay = document.querySelector('[data-auth-display]');
 const authUserLabel = document.querySelector('[data-auth-user]');
 const logoutButton = document.querySelector('[data-auth-logout]');
 const exportButton = document.querySelector('[data-action="export"]');
@@ -948,6 +959,7 @@ const updateProjectMetrics = () => {
   updateBookComparisons(metrics);
 
   if (window.wordTrackerUI && window.wordTrackerUI.newLayout) {
+    window.wordTrackerUI.newLayout.setDateString(metrics.dateString);
     window.wordTrackerUI.newLayout.setDayProgress(metrics.headerLabel);
   }
 };
@@ -2275,20 +2287,15 @@ const toggleAuthUI = (user) => {
     document.body.style.overflow = user ? '' : 'hidden';
   }
 
-  if (authDisplay) {
-    if (user) {
-      authDisplay.removeAttribute('hidden');
-      if (authUserLabel) {
-        authUserLabel.textContent = user.email || 'Signed in';
-      }
-      if (authEmailInput) {
-        authEmailInput.value = '';
-      }
-    } else {
-      authDisplay.setAttribute('hidden', '');
-      if (authUserLabel) authUserLabel.textContent = '';
+  if (user) {
+    if (authUserLabel) {
+      authUserLabel.textContent = user.email || 'Signed in';
+    }
+    if (authEmailInput) {
+      authEmailInput.value = '';
     }
   }
+
   if (authOverlay) {
     if (user) {
       authOverlay.setAttribute('hidden', '');
