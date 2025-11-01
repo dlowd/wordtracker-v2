@@ -14,6 +14,9 @@ const defaultPrefs = () => ({
   theme: 'classic',
   project: createDefaultProject(),
   features: {
+    compactMode: false,
+    quickAddModal: false,
+    quickStatsBar: true,
     bookComparisons: true,
     devFeatures: false
   }

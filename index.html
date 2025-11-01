@@ -13,6 +13,9 @@
   <link rel="stylesheet" href="css/graph.css">
   <link rel="stylesheet" href="css/settings-modal.css">
   <link rel="stylesheet" href="css/book-comparisons.css">
+  <link rel="stylesheet" href="css/book-comparisons-modal.css">
+  <link rel="stylesheet" href="css/quick-stats.css">
+  <link rel="stylesheet" href="css/quick-add-modal.css">
   <link rel="stylesheet" href="css/dev-tools.css">
   <link rel="stylesheet" href="css/auth.css">
   <link rel="stylesheet" href="css/gallery.css">
@@ -28,6 +31,15 @@
           </div>
           <div class="header-actions">
             <p class="day-indicator" data-day-progress>Day 12 of 30</p>
+            <button
+              type="button"
+              class="quick-add-button"
+              data-quick-add-trigger
+              aria-label="Quick add words"
+              hidden
+            >
+              +
+            </button>
             <button type="button" class="settings-button" aria-label="Open settings" data-settings-trigger>
               Settings
             </button>
@@ -42,23 +54,23 @@
             </button>
           </div>
         </div>
-      </header>
+      <div class="quick-stats" data-quick-stats hidden aria-live="polite"></div>
       <section class="word-entry-section" aria-label="Word entry section">
         <div class="word-entry" data-word-entry hidden>
-          <!-- <header class="word-entry__header">
+          <header class="word-entry__header">
             <h2 class="word-entry__title">Log Your Progress</h2>
-          </header> -->
+          </header> 
           <form class="word-entry__form" data-word-entry-form novalidate>
             <div class="word-entry__controls">
               <label class="form-field">
-                      <!-- <span class="form-field__label">Mode</span> -->
+                <span class="form-field__label">Mode</span>
                 <select name="entryMode" class="form-field__select" aria-label="Word entry mode" data-entry-mode>
                   <option value="add" selected>Add words</option>
                   <option value="set">Set total</option>
                 </select>
               </label>
               <label class="form-field">
-                      <!-- <span class="form-field__label">Word count</span> -->
+                <span class="form-field__label">Word count</span> 
                 <input
                   type="number"
                   name="wordCount"
@@ -79,22 +91,24 @@
               </button>
             </div>
           </form>
+					<!--
           <p class="word-entry__status" role="status" aria-live="polite" data-entry-status>
             Enter your words to see progress updates here.
-          </p>
+					</p> -->
         </div>
       </section>
+      </header>
       <div class="main-dashboard">
         <aside class="sidebar" aria-label="Sidebar and actions">
           <section class="sidebar__section sidebar__stats" aria-label="Progress stats">
             <header class="sidebar__section-header">
-              <h2 class="sidebar__section-title">Progress Overview</h2>
+               <h2 class="sidebar__section-title">Progress Overview</h2> 
             </header>
             <div class="stat-list" data-stat-list>
               <article class="stat-card" data-stat-id="totalWords">
                 <p class="stat-card__label">Total Words</p>
                 <p class="stat-card__value" data-stat-value>0</p>
-              </article>
+              </article> 
               <article class="stat-card" data-stat-id="wordsToday">
                 <p class="stat-card__label">Words Today</p>
                 <p class="stat-card__value" data-stat-value>0</p>
@@ -184,20 +198,18 @@
           </section>
         </aside>
         <section class="graph-area" aria-label="Graph area">
-          <section class="progress-summary" aria-label="Progress summary" data-progress-summary>
-            <div class="progress-summary__header">
-              <p class="progress-summary__label">Overall Progress</p>
-              <p class="progress-summary__value" data-progress-percentage>0%</p>
-            </div>
+          <section class="progress-summary" data-progress-summary>
+            <p>Total words: 
+              <span class="progress-summary__words" data-progress-words>
+                0 / 50,000</span>
+             <span class="progress-summary__percent" data-progress-percentage>(0%)</span>
+            </p>
             <div class="progress-summary__bar" role="img" aria-label="Progress toward word count goal">
               <div class="progress-summary__bar-track">
                 <div class="progress-summary__bar-fill" data-progress-bar style="width: 0%;"></div>
+                </div>
               </div>
-            </div>
-            <div class="progress-summary__footer">
-              <p class="progress-summary__words" data-progress-words>0 / 50,000 words</p>
               <p class="progress-summary__pace" data-progress-pace>On track ✓</p>
-            </div>
           </section>
           <section class="graph-visual" aria-label="Word count graph" data-graph>
             <canvas class="graph-visual__canvas" data-graph-canvas role="img" aria-label="Word count trend"></canvas>
@@ -211,9 +223,13 @@
             </div>
           </section>
           <section class="book-comparisons" data-book-comparisons hidden aria-label="Book comparisons">
-            <div class="book-comparisons__header">
+            <div class="book-comparisons__header" data-book-comparisons-header>
               <h2 class="book-comparisons__title">Book Comparisons</h2>
+              <button type="button" class="book-comparisons__more" data-book-comparisons-more hidden>
+                More
+              </button>
             </div>
+            <p class="book-comparisons__summary" data-book-comparisons-summary hidden></p>
             <p class="book-comparisons__empty" data-book-comparisons-empty>
               Keep writing to unlock literary milestones.
             </p>
@@ -344,8 +360,20 @@
               <span>Daily Rewards (kitten gallery)</span>
             </label>
             <label class="settings-checkbox">
+              <input type="checkbox" data-feature-toggle="quickAddModal">
+              <span>Quick add modal</span>
+            </label>
+            <label class="settings-checkbox">
+              <input type="checkbox" data-feature-toggle="quickStatsBar" checked>
+              <span>Quick stats bar</span>
+            </label>
+            <label class="settings-checkbox">
               <input type="checkbox" data-feature-toggle="bookComparisons" checked>
               <span>Book Comparisons</span>
+            </label>
+            <label class="settings-checkbox">
+              <input type="checkbox" data-feature-toggle="compactMode">
+              <span>Compact mode</span>
             </label>
             <label class="settings-checkbox">
               <input type="checkbox" data-feature-toggle="devFeatures">
@@ -377,6 +405,36 @@
       </footer>
     </div>
   </div>
+  <div class="book-comparisons-modal" data-book-comparisons-modal hidden>
+    <div class="book-comparisons-modal__backdrop" data-book-comparisons-dismiss></div>
+    <div class="book-comparisons-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="book-comparisons-modal-title">
+      <header class="book-comparisons-modal__header">
+        <h2 id="book-comparisons-modal-title">More Comparisons</h2>
+        <button
+          type="button"
+          class="book-comparisons-modal__close"
+          aria-label="Close comparisons"
+          data-book-comparisons-dismiss
+          data-book-comparisons-close
+        >&times;</button>
+      </header>
+      <div class="book-comparisons-modal__body">
+        <p class="book-comparisons-modal__empty" data-book-comparisons-modal-empty>No additional comparisons yet. Keep writing!</p>
+        <ul class="book-comparisons-modal__list" data-book-comparisons-modal-list></ul>
+        <p class="book-comparisons-modal__next" data-book-comparisons-modal-next hidden></p>
+      </div>
+      <footer class="book-comparisons-modal__footer">
+        <button
+          type="button"
+          class="button button--secondary"
+          data-book-comparisons-dismiss
+          data-book-comparisons-close
+        >
+          Close
+        </button>
+      </footer>
+    </div>
+  </div>
   <div class="gallery-modal" data-reward-gallery-modal hidden>
     <div class="gallery-modal__backdrop" data-gallery-dismiss></div>
     <div class="gallery-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="reward-gallery-title">
@@ -390,6 +448,51 @@
       </div>
       <footer class="gallery-modal__footer">
         <button type="button" class="button button--secondary" data-gallery-dismiss>Close</button>
+      </footer>
+    </div>
+  </div>
+  <div class="quick-add-modal" data-quick-add-modal hidden>
+    <div class="quick-add-modal__backdrop" data-quick-add-dismiss></div>
+    <div class="quick-add-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="quick-add-modal-title">
+      <header class="quick-add-modal__header">
+        <h2 id="quick-add-modal-title">Quick Add Words</h2>
+        <button
+          type="button"
+          class="quick-add-modal__close"
+          aria-label="Close quick add modal"
+          data-quick-add-dismiss
+        >&times;</button>
+      </header>
+      <form class="quick-add-modal__body" data-quick-add-form>
+        <div class="quick-add-modal__control">
+          <label class="quick-add-modal__label" for="quick-add-modal-mode">Mode</label>
+          <select id="quick-add-modal-mode" class="quick-add-modal__mode" data-quick-add-mode>
+            <option value="add" selected>Add words</option>
+            <option value="set">Set total</option>
+          </select>
+        </div>
+        <div class="quick-add-modal__control">
+          <label class="quick-add-modal__label" for="quick-add-modal-input">Word count</label>
+          <input
+            id="quick-add-modal-input"
+            class="quick-add-modal__input"
+            type="number"
+            inputmode="numeric"
+            step="1"
+            min="-1000000"
+            data-quick-add-input
+            required
+          >
+        </div>
+        <p class="quick-add-modal__error" data-quick-add-error aria-live="polite"></p>
+      </form>
+      <footer class="quick-add-modal__footer">
+        <button type="button" class="button button--secondary" data-quick-add-dismiss>
+          Cancel
+        </button>
+        <button type="button" class="button button--primary" data-quick-add-submit>
+          Update Words
+        </button>
       </footer>
     </div>
   </div>

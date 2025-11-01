@@ -309,7 +309,7 @@ export const formatMetricsForDisplay = (metrics) => {
       metrics.averageWordsPerDay > 0 ? formatNumber(metrics.averageWordsPerDay) : '—',
     wordsRemaining: formatSignedNumber(metrics.wordsRemaining),
     goalWords: formatNumber(metrics.goalWords),
-    progressWordsLabel: `${formatNumber(metrics.totalWords)} / ${formatNumber(metrics.goalWords)} words`,
+    progressWordsLabel: `${formatNumber(metrics.totalWords)} / ${formatNumber(metrics.goalWords)}`,
     paceLabel: metrics.paceLabel,
     paceState: metrics.paceState,
     bestDay: bestDayDisplay,

@@ -1,3 +1,5 @@
+import { parseDateKey, parseDateInput } from './date-utils.js';
+
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
   month: 'short',
   day: 'numeric',
@@ -109,6 +111,7 @@ export class RewardsGallery {
       card.dataset.rewardLabel = reward.label || reward.name || 'Reward';
       card.dataset.rewardMessage = reward.message || '';
       card.dataset.rewardDate = reward.date || '';
+      card.dataset.rewardUnlocked = reward.unlockedAt || '';
 
       const thumb = document.createElement('div');
       thumb.className = 'gallery-card__thumb';
@@ -123,12 +126,11 @@ export class RewardsGallery {
       }
       card.appendChild(thumb);
 
-      if (reward.unlockedAt || reward.date) {
+      const displayDate = this.resolveDisplayDate(reward);
+      if (displayDate) {
         const date = document.createElement('p');
         date.className = 'gallery-card__date';
-        const dateValue = reward.unlockedAt || reward.date;
-        const parsed = new Date(dateValue);
-        date.textContent = dateFormatter.format(parsed);
+        date.textContent = dateFormatter.format(displayDate);
         card.appendChild(date);
       }
 
@@ -141,6 +143,21 @@ export class RewardsGallery {
 
       this.grid.appendChild(card);
     });
+  }
+
+  resolveDisplayDate(reward) {
+    if (!reward) return null;
+    if (reward.date) {
+      const parsedKey = parseDateKey(reward.date);
+      if (parsedKey) return parsedKey;
+      const parsedFallback = parseDateInput(reward.date);
+      if (parsedFallback) return parsedFallback;
+    }
+    if (reward.unlockedAt) {
+      const parsedUnlocked = parseDateInput(reward.unlockedAt);
+      if (parsedUnlocked) return parsedUnlocked;
+    }
+    return null;
   }
 
   refreshTriggers() {

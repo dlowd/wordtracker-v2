@@ -1,0 +1,123 @@
+.book-comparisons-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1080;
+}
+
+.book-comparisons-modal[hidden] {
+  display: none;
+}
+
+.book-comparisons-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.6);
+  backdrop-filter: blur(3px);
+}
+
+.book-comparisons-modal__dialog {
+  position: relative;
+  width: min(480px, 94vw);
+  max-height: 90vh;
+  background: var(--background);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.book-comparisons-modal__header,
+.book-comparisons-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.book-comparisons-modal__header h2 {
+  margin: 0;
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-semibold);
+}
+
+.book-comparisons-modal__close {
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.book-comparisons-modal__body {
+  padding: var(--space-5);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.book-comparisons-modal__empty {
+  margin: 0;
+  text-align: center;
+  font-size: var(--font-size-body);
+  color: var(--text-secondary);
+}
+
+.book-comparisons-modal__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.book-comparisons-modal__next {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--text-secondary);
+}
+
+.book-comparison-modal__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: rgba(8, 145, 178, 0.08);
+  box-shadow: var(--shadow-sm);
+}
+
+.book-comparison-modal__title {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.book-comparison-modal__meta {
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
+.book-comparisons-modal__footer {
+  border-top: 1px solid var(--gray-200);
+  border-bottom: none;
+  justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .book-comparisons-modal__dialog {
+    width: 96vw;
+    border-radius: var(--radius-lg);
+  }
+
+  .book-comparisons-modal__body {
+    padding: var(--space-4);
+  }
+}

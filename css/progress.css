@@ -96,3 +96,60 @@
     align-items: flex-start;
   }
 }
+/* --- Zen Progress Summary --- */
+.progress-summary {
+  text-align: center;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.progress-summary__words {
+  font-weight: var(--font-weight-bold);
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.progress-summary__percent {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-left: 0.25rem;
+}
+
+.progress-summary__bar-track {
+  width: 100%;
+  height: 0.4rem;
+  border-radius: var(--radius-md);
+  background: var(--gray-200);
+  overflow: hidden;
+}
+
+.progress-summary__bar-fill {
+  height: 100%;
+  background: var(--teal-700);
+  transition: width 0.3s ease;
+}
+
+.progress-summary__pace {
+  font-size: 0.85rem;
+  color: var(--teal-700);
+  margin: 0;
+}
+
+/* --- Mobile tweak --- */
+@media (max-width: 600px) {
+  .progress-summary {
+    padding: var(--space-2);
+    gap: var(--space-1);
+  }
+
+  .progress-summary__words {
+    font-size: 0.9rem;
+  }
+}

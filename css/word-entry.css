@@ -190,3 +190,77 @@
     width: 100%;
   }
 }
+
+/* --- Compact Layout Overrides v2 --- */
+
+.word-entry {
+  gap: 0.5rem;              /* tighter vertical spacing */
+  padding-block: 0.25rem;   /* less top/bottom breathing room */
+}
+
+.word-entry__form {
+  gap: 0.5rem;
+}
+
+/* tighter field spacing */
+.form-field {
+  gap: 0.25rem;
+}
+
+/* Inputs & selects */
+.form-field__select,
+.form-field__input {
+  height: 2rem;             /* smaller, about 32px */
+  padding: 0 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+/* Buttons */
+.button {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+}
+
+/* The "Undo Last" button usually benefits from reduced margin */
+.word-entry__actions {
+  gap: 0.5rem;
+}
+
+/* Progress text */
+.word-entry__status {
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* Desktop layout */
+@media (min-width: 768px) {
+  .word-entry__form {
+    grid-template-columns: minmax(100px, 140px) minmax(140px, 1fr) auto auto;
+    gap: 0.5rem;
+  }
+}
+
+/* Mobile layout */
+@media (max-width: 480px) {
+  .word-entry__form {
+    grid-template-columns: 1fr;
+  }
+
+  .button {
+    width: 100%;
+  }
+}
+
+body.is-compact-mode .word-entry__header {
+  display: none;
+}
+
+body.is-compact-mode .word-entry .form-field__label {
+  display: none;
+}
+
+body.is-quick-add-mode .word-entry-section {
+  display: none;
+}

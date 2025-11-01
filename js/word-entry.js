@@ -136,6 +136,10 @@ export class WordEntryController {
     return this.getModeValue();
   }
 
+  getTotalWords() {
+    return this.state.totalWords;
+  }
+
   async handleSubmit(event) {
     event.preventDefault();
     if (this.isProcessing) return;
@@ -212,6 +216,14 @@ export class WordEntryController {
       this.modeField.value = normalized;
     }
 
+    if (this.countField) {
+      if (normalized === 'set') {
+        this.countField.value = String(this.state.totalWords || 0);
+      } else if (!this.isProcessing) {
+        this.countField.value = '';
+      }
+    }
+
     if (persist) {
       this.persistMode(normalized);
     }
@@ -250,6 +262,37 @@ export class WordEntryController {
     } catch (error) {
       console.warn('Unable to persist word entry mode.', error);
     }
+  }
+
+  async quickSubmit(mode, rawValue) {
+    if (this.isProcessing) {
+      throw new Error('Please wait for the current update to finish.');
+    }
+
+    const normalized = mode === 'set' ? 'set' : 'add';
+    const numeric = Number(rawValue);
+    if (!Number.isFinite(numeric)) {
+      this.updateStatus(STATUS_MESSAGES.invalidNumber);
+      throw new Error(STATUS_MESSAGES.invalidNumber);
+    }
+
+    this.setMode(normalized, { persist: true, announce: false });
+
+    if (normalized === 'add') {
+      if (numeric === 0) {
+        this.updateStatus(STATUS_MESSAGES.zeroDelta);
+        throw new Error(STATUS_MESSAGES.zeroDelta);
+      }
+      await this.processAddMode(numeric);
+      return;
+    }
+
+    if (numeric < 0) {
+      this.updateStatus(STATUS_MESSAGES.negativeTotal);
+      throw new Error(STATUS_MESSAGES.negativeTotal);
+    }
+
+    await this.processSetMode(numeric);
   }
 
   async processAddMode(rawValue) {

@@ -29,6 +29,24 @@
   color: var(--text-secondary);
 }
 
+.book-comparisons__more {
+  border: none;
+  background: transparent;
+  color: var(--teal-700);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  padding: 0;
+}
+
+.book-comparisons__more:hover,
+.book-comparisons__more:focus-visible {
+  color: var(--teal-800);
+  text-decoration: underline;
+}
+
 .book-comparisons__list {
   list-style: none;
   margin: 0;
@@ -36,6 +54,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.book-comparisons__summary {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--text-secondary);
 }
 
 .book-comparison__item {
@@ -71,8 +95,39 @@
   text-align: center;
 }
 
+.book-comparisons__more--inline {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  vertical-align: baseline;
+}
+
+.book-comparisons--compact {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  gap: var(--space-2);
+}
+
+.book-comparisons--compact .book-comparisons__summary {
+  color: var(--text-primary);
+}
+
+.book-comparisons--compact .book-comparisons__empty {
+  display: none;
+}
+
+.book-comparisons--compact .book-comparisons__next {
+  margin-top: var(--space-2);
+}
+
 @media (max-width: 767px) {
   .book-comparisons {
     padding: var(--space-3);
+  }
+
+  .book-comparisons--compact {
+    padding: 0;
   }
 }

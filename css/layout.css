@@ -31,12 +31,12 @@
 .app-header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  padding: var(--space-3);
+  gap: var(--space-2);
   background: linear-gradient(135deg, var(--teal-600), var(--teal-500));
   color: #ffffff;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  padding: var(--space-4);
 }
 
 .header-top {
@@ -55,9 +55,9 @@
 
 .project-name {
   margin: 0;
-  font-size: var(--font-size-display-md);
   font-weight: var(--font-weight-bold);
   color: inherit;
+  font-size: clamp(1.1rem, 3vw, var(--font-size-display-md));
   white-space: normal;
   overflow-wrap: break-word;
   word-break: break-word;
@@ -70,11 +70,40 @@
   gap: var(--space-3);
 }
 
+.quick-add-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  font-weight: var(--font-weight-semibold);
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.quick-add-button:hover,
+.quick-add-button:focus-visible {
+  background: rgba(255, 255, 255, 0.32);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-sm);
+}
+
+.quick-add-button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
 .day-indicator {
   margin: 0;
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-medium);
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .settings-button {
@@ -108,7 +137,8 @@
   justify-content: space-between;
   gap: var(--space-3);
   font-size: var(--font-size-label);
-  color: rgba(255, 255, 255, 0.85);
+  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .header-meta__auth {
@@ -138,7 +168,6 @@
 }
 
 .word-entry-section {
-  min-height: 6rem;
   background: var(--teal-50);
   box-shadow: var(--shadow-md);
 }
@@ -197,9 +226,30 @@
     justify-content: space-between;
   }
 
+  .quick-add-button {
+    position: fixed;
+    bottom: var(--space-5);
+    right: var(--space-5);
+    width: 3.25rem;
+    height: 3.25rem;
+    font-size: 1.75rem;
+    background: var(--teal-600);
+    color: #ffffff;
+    box-shadow: var(--shadow-lg);
+    z-index: 1050;
+  }
+
+  .quick-add-button:hover,
+  .quick-add-button:focus-visible {
+    background: var(--teal-700);
+  }
+
   .header-meta {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-2);
   }
+}
+body:not(.is-quick-add-mode) .quick-add-button {
+  display: none !important;
 }

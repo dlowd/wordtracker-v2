@@ -9,6 +9,8 @@ import { initProgressSummary } from './progress-summary.js';
 import { initGraph } from './graph.js';
 import { initSettingsModal } from './settings-modal.js';
 import { initBookComparisons, loadBooks } from './book-comparisons.js';
+import initQuickAddModal from './quick-add.js';
+import { initQuickStats } from './quick-stats.js';
 import { getPreferences, setOptionalStatPreference, setFeaturePreference, setProjectPreference, setThemePreference } from './preferences.js';
 import supabase from './supabase-client.js';
 import { getDateKey, startOfDay, addDays, parseDateInput, parseDateKey } from './date-utils.js';
@@ -85,6 +87,8 @@ let latestMetrics = null;
 let latestRewards = [];
 let bookComparisonsController = null;
 let booksData = [];
+let quickStatsController = null;
+let quickAddModalController = null;
 let rewardsGalleryController = null;
 let rewardsAdminController = null;
 const rewardsAdminState = {
@@ -115,6 +119,9 @@ const defaultOptionalStats = {
 };
 
 const defaultFeaturePrefs = {
+  compactMode: false,
+  quickAddModal: false,
+  quickStatsBar: true,
   rewardsSystem: true,
   bookComparisons: true,
   devFeatures: false
@@ -218,6 +225,14 @@ const imageModalTitle = imageModal?.querySelector('[data-image-modal-title]') ||
 const imageModalPicture = imageModal?.querySelector('[data-image-modal-picture]') || null;
 const imageModalCaption = imageModal?.querySelector('[data-image-modal-caption]') || null;
 const imageModalDismissButtons = Array.from(imageModal?.querySelectorAll('[data-image-modal-dismiss]') || []);
+const quickAddTriggers = Array.from(document.querySelectorAll('[data-quick-add-trigger]'));
+const quickAddModalRoot = document.querySelector('[data-quick-add-modal]');
+const quickAddDismissButtons = Array.from(quickAddModalRoot?.querySelectorAll('[data-quick-add-dismiss]') || []);
+const quickAddInput = quickAddModalRoot?.querySelector('[data-quick-add-input]') || null;
+const quickAddSubmitButton = quickAddModalRoot?.querySelector('[data-quick-add-submit]') || null;
+const quickAddErrorField = quickAddModalRoot?.querySelector('[data-quick-add-error]') || null;
+const quickAddForm = quickAddModalRoot?.querySelector('[data-quick-add-form]') || null;
+const quickAddModeSelect = quickAddModalRoot?.querySelector('[data-quick-add-mode]') || null;
 
 if (devEditButton) {
   devEditButton.hidden = true;
@@ -268,6 +283,26 @@ const setFeatureEnabled = (id, enabled, options = {}) => {
     toggleDevToolsVisibility(enabled);
     if (!enabled && entriesEditorController) {
       entriesEditorController.close();
+    }
+  }
+
+  if (id === 'compactMode') {
+    applyCompactMode(enabled);
+  }
+
+  if (id === 'quickStatsBar') {
+    if (enabled && isFeatureEnabled('quickStatsBar')) {
+      enableQuickStatsBar();
+    } else {
+      disableQuickStatsBar();
+    }
+  }
+
+  if (id === 'quickAddModal') {
+    if (enabled && isFeatureEnabled('quickAddModal')) {
+      enableQuickAddModalMode();
+    } else {
+      disableQuickAddModalMode();
     }
   }
 
@@ -925,6 +960,10 @@ const updateProjectMetrics = () => {
   const formatted = formatMetricsForDisplay(metrics);
   latestMetrics = metrics;
 
+  if (quickStatsController) {
+    quickStatsController.update(metrics);
+  }
+
   if (sidebarController) {
     sidebarController.setStat('totalWords', { value: formatted.totalWords });
     sidebarController.setStat('wordsToday', {
@@ -998,6 +1037,10 @@ const enableNewWordEntry = () => {
   window.wordTrackerUI = window.wordTrackerUI || {};
   window.wordTrackerUI.wordEntry = Object.freeze(getWordEntryAPI());
 
+  if (featurePreferences.quickAddModal && isFeatureEnabled('quickAddModal')) {
+    enableQuickAddModalMode();
+  }
+
   updateProjectMetrics();
 };
 
@@ -1016,6 +1059,8 @@ const disableNewWordEntry = () => {
     wordEntryController.destroy();
     wordEntryController = null;
   }
+
+  disableQuickAddModalMode();
 
   if (window.wordTrackerUI && window.wordTrackerUI.wordEntry) {
     delete window.wordTrackerUI.wordEntry;
@@ -1107,6 +1152,27 @@ const handleImageModalKeydown = (event) => {
   }
 };
 
+const resolveRewardDisplayDate = (reward) => {
+  if (!reward) return null;
+  if (reward.date) {
+    const parsedKey = parseDateKey(reward.date);
+    if (parsedKey) return parsedKey;
+    const parsedDate = parseDateInput(reward.date);
+    if (parsedDate) {
+      const normalized = startOfDay(parsedDate);
+      if (normalized) return normalized;
+    }
+  }
+  if (reward.unlockedAt) {
+    const parsedUnlocked = parseDateInput(reward.unlockedAt);
+    if (parsedUnlocked) {
+      const normalized = startOfDay(parsedUnlocked);
+      if (normalized) return normalized;
+    }
+  }
+  return null;
+};
+
 const openImageModal = (reward) => {
   if (!imageModal || !reward || !reward.image) {
     return;
@@ -1120,8 +1186,15 @@ const openImageModal = (reward) => {
     imageModalTitle.textContent = reward.label || reward.name || 'Reward preview';
   }
   if (imageModalCaption) {
-    const dateText = reward.date ? `Unlocked ${rewardDateFormatter.format(new Date(reward.date))}. ` : '';
-    imageModalCaption.textContent = `${dateText}${reward.message || ''}`.trim();
+    const displayDate = resolveRewardDisplayDate(reward);
+    const segments = [];
+    if (displayDate) {
+      segments.push(`Unlocked ${rewardDateFormatter.format(displayDate)}.`);
+    }
+    if (reward.message) {
+      segments.push(reward.message);
+    }
+    imageModalCaption.textContent = segments.join(' ').trim();
   }
   imageModal.removeAttribute('hidden');
   imageModalTitle?.focus();
@@ -1151,7 +1224,8 @@ const attachGalleryPreviewHandlers = () => {
         image: card.dataset.rewardImage,
         label: card.dataset.rewardLabel,
         message: card.dataset.rewardMessage,
-        date: card.dataset.rewardDate
+        date: card.dataset.rewardDate,
+        unlockedAt: card.dataset.rewardUnlocked
       };
       openImageModal(reward);
     };
@@ -1163,7 +1237,8 @@ const attachGalleryPreviewHandlers = () => {
           image: card.dataset.rewardImage,
           label: card.dataset.rewardLabel,
           message: card.dataset.rewardMessage,
-          date: card.dataset.rewardDate
+          date: card.dataset.rewardDate,
+          unlockedAt: card.dataset.rewardUnlocked
         };
         openImageModal(reward);
       }
@@ -1191,6 +1266,8 @@ const renderRewardPlaceholder = () => {
     rewardImageTrigger.dataset.rewardImage = '';
     rewardImageTrigger.dataset.rewardLabel = '';
     rewardImageTrigger.dataset.rewardMessage = '';
+    rewardImageTrigger.dataset.rewardDate = '';
+    rewardImageTrigger.dataset.rewardUnlocked = '';
   }
 };
 
@@ -1223,12 +1300,16 @@ const renderRewardCard = (reward) => {
     rewardCard.dataset.rewardImage = reward.image || '';
     rewardCard.dataset.rewardLabel = reward.label || reward.name || 'Reward';
     rewardCard.dataset.rewardMessage = reward.message || '';
+    rewardCard.dataset.rewardDate = reward.date || '';
+    rewardCard.dataset.rewardUnlocked = reward.unlockedAt || '';
   }
   if (rewardImageTrigger) {
     rewardImageTrigger.dataset.rewardId = reward.id || '';
     rewardImageTrigger.dataset.rewardImage = reward.image || '';
     rewardImageTrigger.dataset.rewardLabel = reward.label || reward.name || 'Reward';
     rewardImageTrigger.dataset.rewardMessage = reward.message || '';
+    rewardImageTrigger.dataset.rewardDate = reward.date || '';
+    rewardImageTrigger.dataset.rewardUnlocked = reward.unlockedAt || '';
     rewardImageTrigger.disabled = !reward.image;
   }
 };
@@ -1432,7 +1513,10 @@ const updateRewardsUI = (metrics = null) => {
   updateRewardGalleryView(latestRewards);
 
   if (result?.reward) {
-    renderRewardCard(result.reward);
+    const rewardForCard = result.date
+      ? { ...result.reward, date: result.date }
+      : result.reward;
+    renderRewardCard(rewardForCard);
     if (result.unlockedToday && result.date) {
       void persistRewardToSupabase(result.date, result.reward);
     }
@@ -1730,6 +1814,104 @@ const toggleDevToolsVisibility = (enabled) => {
   }
 };
 
+const applyCompactMode = (enabled) => {
+  const body = document.body;
+  if (body) {
+    body.classList.toggle('is-compact-mode', Boolean(enabled));
+  }
+
+  if (bookComparisonsController && typeof bookComparisonsController.setCompactMode === 'function') {
+    bookComparisonsController.setCompactMode(Boolean(enabled));
+  }
+};
+
+const enableQuickAddModalMode = () => {
+  if (!quickAddModalRoot || !wordEntryController) {
+    return;
+  }
+
+  document.body.classList.add('is-quick-add-mode');
+  quickAddTriggers.forEach((trigger) => trigger?.removeAttribute('hidden'));
+
+  if (quickAddModeSelect && wordEntryController) {
+    quickAddModeSelect.value = wordEntryController.getMode?.() || 'add';
+    if (quickAddInput) {
+      if (quickAddModeSelect.value === 'set') {
+        quickAddInput.value = String(wordEntryController.getTotalWords?.() ?? 0);
+      } else {
+        quickAddInput.value = '';
+      }
+    }
+  }
+
+  if (quickAddModalController) {
+    quickAddModalController.destroy();
+  }
+
+  quickAddModalController = initQuickAddModal({
+    modal: quickAddModalRoot,
+    triggers: quickAddTriggers,
+    input: quickAddInput,
+    submitButton: quickAddSubmitButton,
+    dismissElements: quickAddDismissButtons,
+    errorField: quickAddErrorField,
+    form: quickAddForm,
+    modeSelect: quickAddModeSelect,
+    getPrefillValue: (mode) => {
+      if (!wordEntryController) return null;
+      if (mode === 'set') {
+        return wordEntryController.getTotalWords?.() ?? 0;
+      }
+      return '';
+    },
+    onModeChange: (mode) => {
+      if (!wordEntryController) return;
+      wordEntryController.setMode?.(mode, { persist: true, announce: false });
+    },
+    onSubmit: async ({ mode, value }) => {
+      if (!wordEntryController) {
+        throw new Error('Word entry is not available.');
+      }
+      await wordEntryController.quickSubmit(mode, value);
+    }
+  });
+};
+
+const disableQuickAddModalMode = () => {
+  document.body.classList.remove('is-quick-add-mode');
+  quickAddTriggers.forEach((trigger) => trigger?.setAttribute('hidden', ''));
+  if (quickAddModalController) {
+    quickAddModalController.destroy();
+    quickAddModalController = null;
+  }
+  if (quickAddModalRoot && !quickAddModalRoot.hasAttribute('hidden')) {
+    quickAddModalRoot.setAttribute('hidden', '');
+  }
+};
+
+const enableQuickStatsBar = () => {
+  if (!isFeatureEnabledForUser('quickStatsBar')) {
+    disableQuickStatsBar();
+    return;
+  }
+  if (!quickStatsController) {
+    quickStatsController = initQuickStats();
+  }
+  if (quickStatsController) {
+    quickStatsController.setEnabled(true);
+    if (latestMetrics) {
+      quickStatsController.update(latestMetrics);
+    }
+  }
+};
+
+const disableQuickStatsBar = () => {
+  if (quickStatsController) {
+    quickStatsController.destroy();
+    quickStatsController = null;
+  }
+};
+
 const getProjectTimeline = () => {
   const snapshot = wordDataStore.getSnapshot();
   const entries = snapshot.entries || [];
@@ -1894,6 +2076,9 @@ const enableBookComparisons = () => {
   }
   if (!bookComparisonsController) {
     bookComparisonsController = initBookComparisons();
+    if (bookComparisonsController) {
+      bookComparisonsController.setCompactMode(Boolean(featurePreferences.compactMode));
+    }
   }
 
   loadBooks()
@@ -2569,6 +2754,8 @@ const applyFeatureFlags = () => {
   body.dataset.featureProgressSummary = String(FEATURES.newProgressSummary);
   body.dataset.featureRewardsSystem = String(FEATURES.rewardsSystem);
   body.dataset.featureBookComparisons = String(FEATURES.bookComparisons);
+  body.dataset.featureQuickStatsBar = String(FEATURES.quickStatsBar);
+  body.dataset.featureQuickAddModal = String(FEATURES.quickAddModal);
 
   const newLayoutRoot = document.querySelector(selectors.newLayoutRoot);
   if (!newLayoutRoot) {
@@ -2616,6 +2803,18 @@ const applyFeatureFlags = () => {
     enableBookComparisons();
   } else {
     disableBookComparisons();
+  }
+
+  if (isFeatureEnabled('quickStatsBar') && isFeatureEnabledForUser('quickStatsBar')) {
+    enableQuickStatsBar();
+  } else {
+    disableQuickStatsBar();
+  }
+
+  if (isFeatureEnabled('quickAddModal') && isFeatureEnabledForUser('quickAddModal')) {
+    enableQuickAddModalMode();
+  } else {
+    disableQuickAddModalMode();
   }
 
   toggleDevToolsVisibility(isFeatureEnabledForUser('devFeatures'));

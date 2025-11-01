@@ -18,7 +18,7 @@ export class ProgressSummaryController {
 
   setProgress({ percentage, wordsLabel, paceLabel, paceState }) {
     if (this.percentageEl) {
-      this.percentageEl.textContent = percentage;
+      this.percentageEl.textContent = `(${percentage})`;
     }
 
     if (this.barEl) {
