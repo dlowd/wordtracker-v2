@@ -127,7 +127,7 @@ export const computeProjectMetrics = (snapshot, project, today = new Date()) => 
 
   const remainingForRequirement = Math.max(wordsRemainingRaw, 0);
   const wordsPerDayRequired =
-    requirementDays > 0 ? Math.ceil(remainingForRequirement / requirementDays) : 0;
+    requirementDays > 0 ? Math.ceil(remainingForRequirement / Math.max(requirementDays-1, 1)) : 0;
 
   const paceDenominator = dayPhase.totalDays > 0 ? dayPhase.totalDays : requirementDays;
   const dailyPace = paceDenominator > 0 ? goalWords / paceDenominator : 0;
