@@ -4,13 +4,13 @@
   gap: var(--space-3);
   flex-wrap: wrap;
   font-size: var(--font-size-label);
-  color: var(--text-secondary);
+  color: var(--quick-stats-text, var(--text-secondary));
   margin: var(--space-1) auto var(--space-2) 0;
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.65);
+  background: var(--quick-stats-bg, rgba(255, 255, 255, 0.65));
   backdrop-filter: blur(2px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--quick-stats-border, rgba(255, 255, 255, 0.18));
   box-shadow: var(--shadow-sm);
 }
 
@@ -34,11 +34,11 @@
 
 .quick-stats__value {
   font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
+  color: var(--quick-stats-value, var(--text-primary));
 }
 
 .quick-stats__separator {
-  color: var(--text-muted, var(--text-secondary));
+  color: var(--quick-stats-separator, var(--text-secondary));
   opacity: 0.6;
 }
 

@@ -147,7 +147,7 @@ Object.keys(featurePreferences).forEach((key) => {
   }
 });
 
-const THEMES = Object.freeze(['classic', 'emerald', 'midnight', 'sunset']);
+const THEMES = Object.freeze(['classic', 'emerald', 'midnight', 'twilight', 'sunset', 'wicked']);
 let currentTheme = THEMES.includes(preferenceCache.theme) ? preferenceCache.theme : 'classic';
 if (!THEMES.includes(preferenceCache.theme)) {
   setThemePreference(currentTheme);
