@@ -75,6 +75,34 @@ export class GraphController {
       return null;
     }
     const ctx = this.canvas.getContext('2d');
+
+    const hoverLinePlugin = {
+      id: 'hoverLine',
+      afterDatasetsDraw: (chart) => {
+        const activeElements = chart.getActiveElements?.();
+        if (!activeElements || !activeElements.length) {
+          return;
+        }
+        const { chartArea, ctx: chartCtx } = chart;
+        if (!chartArea || !chartCtx) {
+          return;
+        }
+        const x = activeElements[0].element?.x;
+        if (!Number.isFinite(x)) {
+          return;
+        }
+        chartCtx.save();
+        chartCtx.beginPath();
+        chartCtx.setLineDash([4, 4]);
+        chartCtx.moveTo(x, chartArea.top);
+        chartCtx.lineTo(x, chartArea.bottom);
+        chartCtx.lineWidth = 1;
+        chartCtx.strokeStyle = 'rgba(14, 116, 144, 0.4)';
+        chartCtx.stroke();
+        chartCtx.restore();
+      }
+    };
+
     this.chart = new window.Chart(ctx, {
       type: 'line',
       data: {
@@ -88,7 +116,9 @@ export class GraphController {
             fill: 'origin',
             tension: 0.3,
             borderWidth: 3,
-            pointRadius: 3
+            pointRadius: 3,
+            pointHitRadius: 12,
+            spanGaps: true
           },
           {
             label: 'Pace Line',
@@ -97,13 +127,19 @@ export class GraphController {
             borderDash: [6, 6],
             tension: 0,
             borderWidth: 2,
-            pointRadius: 0
+            pointRadius: 0,
+            spanGaps: true
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+          axis: 'x'
+        },
         scales: {
           y: {
             ticks: {
@@ -118,6 +154,8 @@ export class GraphController {
             position: 'bottom'
           },
           tooltip: {
+            intersect: false,
+            mode: 'index',
             callbacks: {
               label: (context) => {
                 const label = context.dataset.label || '';
@@ -127,7 +165,8 @@ export class GraphController {
             }
           }
         }
-      }
+      },
+      plugins: [hoverLinePlugin]
     });
     return this.chart;
   }
