@@ -1,4 +1,4 @@
-import { formatNumber, formatSignedNumber } from './stats.js';
+import { formatNumber, formatSignedNumber, formatHalfDays } from './stats.js';
 
 const pluralize = (value, singular, plural = `${singular}s`) => {
   const abs = Math.abs(value);
@@ -99,7 +99,7 @@ export class QuickStatsController {
     if (days === 0) {
       return 'On pace';
     }
-    const absDays = formatNumber(Math.abs(days));
+    const absDays = formatHalfDays(days);
     const label = pluralize(days, 'day');
     return days > 0 ? `${absDays} ${label} ahead` : `${absDays} ${label} behind`;
   }

@@ -401,6 +401,7 @@ const getWordEntryAPI = () => ({
   setTotalWords(total) {
     if (wordEntryController) {
       wordEntryController.setTotalWords(total);
+      refreshQuickAddSetValue();
     }
   },
   getState() {
@@ -415,6 +416,26 @@ const getWordEntryAPI = () => ({
     return wordEntryController ? wordEntryController.getMode() : 'add';
   }
 });
+
+const getCurrentTotalWords = () => {
+  const snapshot = typeof wordDataStore.getSnapshot === 'function' ? wordDataStore.getSnapshot() : null;
+  const storeTotal = snapshot && Number.isFinite(snapshot.total) ? snapshot.total : null;
+  if (Number.isFinite(storeTotal)) {
+    return Math.max(0, Math.round(storeTotal));
+  }
+  const controllerTotal =
+    wordEntryController && typeof wordEntryController.getTotalWords === 'function'
+      ? wordEntryController.getTotalWords()
+      : null;
+  return Math.max(0, Number.isFinite(controllerTotal) ? Math.round(controllerTotal) : 0);
+};
+
+const refreshQuickAddSetValue = () => {
+  if (!quickAddInput || !quickAddModeSelect || quickAddModeSelect.value !== 'set') {
+    return;
+  }
+  quickAddInput.value = String(getCurrentTotalWords());
+};
 
 const sanitizeProjectFromBackup = (project = {}) => {
   const fallback = createDefaultProject();
@@ -1631,7 +1652,7 @@ const enableQuickAddModalMode = () => {
     quickAddModeSelect.value = wordEntryController.getMode?.() || 'add';
     if (quickAddInput) {
       if (quickAddModeSelect.value === 'set') {
-        quickAddInput.value = String(wordEntryController.getTotalWords?.() ?? 0);
+        quickAddInput.value = String(getCurrentTotalWords());
       } else {
         quickAddInput.value = '';
       }
@@ -1652,15 +1673,17 @@ const enableQuickAddModalMode = () => {
     form: quickAddForm,
     modeSelect: quickAddModeSelect,
     getPrefillValue: (mode) => {
-      if (!wordEntryController) return null;
       if (mode === 'set') {
-        return wordEntryController.getTotalWords?.() ?? 0;
+        return getCurrentTotalWords();
       }
       return '';
     },
     onModeChange: (mode) => {
       if (!wordEntryController) return;
       wordEntryController.setMode?.(mode, { persist: true, announce: false });
+      if (mode === 'set') {
+        refreshQuickAddSetValue();
+      }
     },
     onSubmit: async ({ mode, value }) => {
       if (!wordEntryController) {
@@ -2524,6 +2547,7 @@ const registerDataListeners = () => {
 
   const onDataChanged = () => {
     updateProjectMetrics();
+    refreshQuickAddSetValue();
   };
 
   window.addEventListener(wordDataStore.events.entryAdded, onDataChanged);

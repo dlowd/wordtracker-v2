@@ -1,5 +1,10 @@
 import { startOfDay, diffInDays, getDateKey, addDays } from './date-utils.js';
 
+const halfDayFormatter = new Intl.NumberFormat(undefined, {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 1
+});
+
 const buildDailyTotals = (entries = []) => {
   if (!entries?.length) return [];
   const totals = new Map();
@@ -32,6 +37,18 @@ const formatSignedNumber = (value) => {
 };
 
 const formatPercentage = (value) => `${Math.round(value)}%`;
+
+const roundDownToHalfDay = (value) => {
+  if (!Number.isFinite(value) || value === 0) {
+    return 0;
+  }
+  const sign = Math.sign(value);
+  const absValue = Math.abs(value);
+  const rounded = Math.floor(absValue * 2) / 2;
+  return rounded === 0 ? 0 : sign * rounded;
+};
+
+const formatHalfDays = (value) => halfDayFormatter.format(Math.abs(value));
 
 const getUniqueEntryDaysCount = (entries) => {
   if (!entries?.length) return 0;
@@ -141,8 +158,8 @@ export const computeProjectMetrics = (snapshot, project, today = new Date()) => 
   }
   const expectedWords = activeDayNumber > 0 ? Math.round(dailyPace * activeDayNumber) : 0;
   const paceDeltaWords = totalWords - expectedWords;
-  // Round down to nearest half day.
-  const daysAheadBehind = dailyPace > 0 ? (Math.floor(2.0 * paceDeltaWords / dailyPace) / 2.0) : 0;
+  const daysAheadBehind =
+    dailyPace > 0 ? roundDownToHalfDay(paceDeltaWords / dailyPace) : 0;
 
   const dailyTotals = buildDailyTotals(entries);
 
@@ -252,10 +269,14 @@ export const computeProjectMetrics = (snapshot, project, today = new Date()) => 
     paceLabel = 'Goal period complete';
     paceState = 'complete';
   } else if (paceDeltaWords > 0) {
-    paceLabel = `${formatNumber(Math.abs(daysAheadBehind))} day${Math.abs(daysAheadBehind) === 1 ? '' : 's'} ahead ✓`;
+    const absDays = Math.abs(daysAheadBehind);
+    const dayLabel = absDays === 1 ? 'day' : 'days';
+    paceLabel = `${formatHalfDays(daysAheadBehind)} ${dayLabel} ahead ✓`;
     paceState = 'ahead';
   } else if (paceDeltaWords < 0) {
-    paceLabel = `${formatNumber(Math.abs(daysAheadBehind))} day${Math.abs(daysAheadBehind) === 1 ? '' : 's'} behind`;
+    const absDays = Math.abs(daysAheadBehind);
+    const dayLabel = absDays === 1 ? 'day' : 'days';
+    paceLabel = `${formatHalfDays(daysAheadBehind)} ${dayLabel} behind`;
     paceState = 'behind';
   }
 
@@ -328,6 +349,6 @@ export const formatMetricsForDisplay = (metrics) => {
   };
 };
 
-export { formatNumber, formatSignedNumber, formatPercentage, buildDailyTotals };
+export { formatNumber, formatSignedNumber, formatPercentage, buildDailyTotals, formatHalfDays };
 
 export default computeProjectMetrics;
