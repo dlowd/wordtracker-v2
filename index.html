@@ -159,43 +159,6 @@
               </button>
             </article>
           </section>
-          <section class="sidebar__section sidebar__actions" aria-label="Quick actions">
-            <header class="sidebar__section-header">
-              <h2 class="sidebar__section-title">Quick Actions</h2>
-            </header>
-            <ul class="action-list">
-              <li class="action-list__item">
-                <button type="button" class="link-button" data-action="export">
-                  Export data
-                </button>
-              </li>
-              <li class="action-list__item">
-                <button type="button" class="link-button" data-action="import">
-                  Import data
-                </button>
-              </li>
-              <li class="action-list__item">
-                <button type="button" class="link-button" data-action="settings" data-settings-trigger>
-                  Customize stats
-                </button>
-              </li>
-              <li class="action-list__item">
-                <button type="button" class="link-button" data-action="dev-edit" hidden>
-                  Edit word entries
-                </button>
-              </li>
-              <li class="action-list__item">
-                <button type="button" class="link-button" data-action="manage-rewards" hidden>
-                  Manage rewards (dev)
-                </button>
-              </li>
-              <li class="action-list__item">
-                <button type="button" class="link-button action-list__item--danger" data-action="reset">
-                  Reset all data
-                </button>
-              </li>
-            </ul>
-          </section>
         </aside>
         <section class="graph-area" aria-label="Graph area">
           <section class="progress-summary" data-progress-summary>
@@ -379,6 +342,28 @@
               <input type="checkbox" data-feature-toggle="devFeatures">
               <span>Development Tools</span>
             </label>
+          </div>
+          <div class="settings-section__content settings-dev-actions">
+            <button type="button" class="link-button" data-action="dev-edit" hidden>
+              Edit word entries
+            </button>
+            <button type="button" class="link-button" data-action="manage-rewards" hidden>
+              Manage rewards (dev)
+            </button>
+          </div>
+        </section>
+        <section class="settings-section">
+          <h3 class="settings-section__title">Data Management</h3>
+          <div class="settings-section__content settings-data-actions">
+            <button type="button" class="link-button" data-action="export">
+              Export data
+            </button>
+            <button type="button" class="link-button" data-action="import">
+              Import data
+            </button>
+            <button type="button" class="link-button action-list__item--danger" data-action="reset">
+              Erase this project’s data
+            </button>
           </div>
         </section>
         <section class="settings-section">

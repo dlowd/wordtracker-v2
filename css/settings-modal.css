@@ -90,6 +90,16 @@
   gap: var(--space-3);
 }
 
+.settings-dev-actions,
+.settings-data-actions {
+  align-items: flex-start;
+}
+
+.settings-dev-actions .link-button,
+.settings-data-actions .link-button {
+  font-size: var(--font-size-body);
+}
+
 .settings-form-actions {
   display: flex;
   align-items: center;
