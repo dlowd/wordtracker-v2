@@ -19,7 +19,8 @@ const defaultPrefs = () => ({
     quickStatsBar: true,
     bookComparisons: true,
     devFeatures: false
-  }
+  },
+  updatedAt: null
 });
 
 const readPreferences = () => {
@@ -30,7 +31,7 @@ const readPreferences = () => {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultPrefs();
     const parsed = JSON.parse(raw);
-    return {
+    const merged = {
       ...defaultPrefs(),
       ...parsed,
       optionalStats: {
@@ -40,8 +41,10 @@ const readPreferences = () => {
       features: {
         ...defaultPrefs().features,
         ...(parsed.features || {})
-      }
+      },
+      updatedAt: parsed.updatedAt || null
     };
+    return merged;
   } catch (error) {
     console.warn('Failed to parse preferences, resetting.', error);
     return defaultPrefs();
@@ -95,29 +98,27 @@ export const updatePreferences = (updater) => {
 };
 
 export const setOptionalStatPreference = (id, enabled) => {
-  const prefs = getPreferences();
-  const next = {
+  const timestamp = new Date().toISOString();
+  return updatePreferences((prefs) => ({
     ...prefs,
     optionalStats: {
       ...prefs.optionalStats,
       [id]: Boolean(enabled)
-    }
-  };
-  updatePreferences(next);
-  return next;
+    },
+    updatedAt: timestamp
+  }));
 };
 
 export const setFeaturePreference = (id, enabled) => {
-  const prefs = getPreferences();
-  const next = {
+  const timestamp = new Date().toISOString();
+  return updatePreferences((prefs) => ({
     ...prefs,
     features: {
       ...prefs.features,
       [id]: Boolean(enabled)
-    }
-  };
-  updatePreferences(next);
-  return next;
+    },
+    updatedAt: timestamp
+  }));
 };
 
 export const setProjectPreference = (project) => {
@@ -126,18 +127,22 @@ export const setProjectPreference = (project) => {
     ...defaultProject,
     ...(project || {})
   };
+  const timestamp = new Date().toISOString();
   updatePreferences((prefs) => ({
     ...prefs,
-    project: nextProject
+    project: nextProject,
+    updatedAt: timestamp
   }));
   return nextProject;
 };
 
 export const setThemePreference = (theme) => {
   const normalized = typeof theme === 'string' ? theme : 'classic';
+  const timestamp = new Date().toISOString();
   updatePreferences((prefs) => ({
     ...prefs,
-    theme: normalized
+    theme: normalized,
+    updatedAt: timestamp
   }));
   return normalized;
 };

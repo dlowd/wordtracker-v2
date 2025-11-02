@@ -11,7 +11,7 @@ import { initSettingsModal } from './settings-modal.js';
 import { initBookComparisons, loadBooks } from './book-comparisons.js';
 import initQuickAddModal from './quick-add.js';
 import { initQuickStats } from './quick-stats.js';
-import { getPreferences, setOptionalStatPreference, setFeaturePreference, setProjectPreference, setThemePreference } from './preferences.js';
+import { getPreferences, setOptionalStatPreference, setFeaturePreference, setProjectPreference, setThemePreference, updatePreferences } from './preferences.js';
 import supabase from './supabase-client.js';
 import { getDateKey, startOfDay, addDays, parseDateInput, parseDateKey } from './date-utils.js';
 import { buildBackupPayload, triggerBackupDownload, readBackupFile, validateBackupPayload, BACKUP_VERSION } from './data-backup.js';
@@ -2116,23 +2116,41 @@ const disableRewardsSystem = () => {
 
 const persistPreferences = async () => {
   if (!supabase || !authUser) return;
+  let localPrefs = getPreferences();
   const optionalStatsPayload = {};
   Object.keys(defaultOptionalStats).forEach((key) => {
-    optionalStatsPayload[key] = optionalStatIds[key] !== false;
+    if (Object.prototype.hasOwnProperty.call(localPrefs.optionalStats || {}, key)) {
+      optionalStatsPayload[key] = localPrefs.optionalStats[key] !== false;
+    } else {
+      optionalStatsPayload[key] = optionalStatIds[key] !== false;
+    }
   });
   const featuresPayload = {};
   Object.keys(defaultFeaturePrefs).forEach((key) => {
-    featuresPayload[key] = featurePreferences[key] !== false;
+    if (Object.prototype.hasOwnProperty.call(localPrefs.features || {}, key)) {
+      featuresPayload[key] = localPrefs.features[key] !== false;
+    } else {
+      featuresPayload[key] = featurePreferences[key] !== false;
+    }
   });
+  let timestamp = localPrefs.updatedAt;
+  if (!timestamp) {
+    timestamp = new Date().toISOString();
+    updatePreferences((prefs) => ({
+      ...prefs,
+      updatedAt: timestamp
+    }));
+    localPrefs = getPreferences();
+  }
   const buildPayload = (includeTheme = true) => {
     const payload = {
       user_id: authUser.id,
       optional_stats: optionalStatsPayload,
       features: featuresPayload,
-      updated_at: new Date().toISOString()
+      updated_at: timestamp
     };
     if (includeTheme) {
-      payload.theme = currentTheme;
+      payload.theme = localPrefs.theme || currentTheme;
     }
     return payload;
   };
@@ -2340,7 +2358,29 @@ const loadPreferencesForUser = async () => {
   Object.assign(optionalStatIds, defaultOptionalStats);
   Object.assign(featurePreferences, defaultFeaturePrefs);
 
+  const localPrefs = getPreferences();
+
+  const applyPreferencesSource = (source) => {
+    const optional = source?.optionalStats || {};
+    Object.keys(defaultOptionalStats).forEach((key) => {
+      optionalStatIds[key] = optional[key] !== false;
+    });
+
+    const features = source?.features || {};
+    Object.keys(defaultFeaturePrefs).forEach((key) => {
+      featurePreferences[key] = features[key] !== false;
+    });
+
+    const theme = source?.theme;
+    if (theme) {
+      updateTheme(theme, { persistLocal: true, persistRemote: false });
+    } else {
+      updateTheme(currentTheme, { persistLocal: true, persistRemote: false });
+    }
+  };
+
   if (!supabase || !authUser) {
+    applyPreferencesSource(localPrefs);
     updateProjectMetrics();
     return;
   }
@@ -2353,30 +2393,42 @@ const loadPreferencesForUser = async () => {
 
   if (error && error.code !== 'PGRST116') {
     console.error('Unable to load preferences', error);
+    applyPreferencesSource(localPrefs);
+    updateProjectMetrics();
     return;
   }
 
-  if (data) {
-    const optional = data.optional_stats || {};
-    Object.keys(defaultOptionalStats).forEach((key) => {
-      if (Object.prototype.hasOwnProperty.call(optional, key)) {
-        optionalStatIds[key] = optional[key] !== false;
-      }
-    });
-    const features = data.features || {};
-    Object.keys(defaultFeaturePrefs).forEach((key) => {
-      if (Object.prototype.hasOwnProperty.call(features, key)) {
-        featurePreferences[key] = features[key] !== false;
-      }
-    });
-    if (data.theme) {
-      updateTheme(data.theme, { persistLocal: true, persistRemote: false });
-    } else {
-      updateTheme(currentTheme, { persistLocal: true, persistRemote: false });
-    }
-  } else {
+  const localTimestamp = Date.parse(localPrefs.updatedAt || '') || 0;
+  const remoteTimestamp = data?.updated_at ? Date.parse(data.updated_at) : 0;
+
+  if (!data || remoteTimestamp < localTimestamp) {
+    applyPreferencesSource(localPrefs);
     await persistPreferences();
+    updateProjectMetrics();
+    return;
   }
+
+  applyPreferencesSource({
+    optionalStats: data.optional_stats || {},
+    features: data.features || {},
+    theme: data.theme || localPrefs.theme
+  });
+
+  updatePreferences((prefs) => ({
+    ...prefs,
+    optionalStats: {
+      ...prefs.optionalStats,
+      ...(data.optional_stats || {})
+    },
+    features: {
+      ...prefs.features,
+      ...(data.features || {})
+    },
+    theme: data.theme || prefs.theme,
+    updatedAt: data.updated_at || new Date().toISOString()
+  }));
+
+  updateProjectMetrics();
 };
 
 const loadProjectForUser = async () => {
