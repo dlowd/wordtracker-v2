@@ -141,7 +141,8 @@ export const computeProjectMetrics = (snapshot, project, today = new Date()) => 
   }
   const expectedWords = activeDayNumber > 0 ? Math.round(dailyPace * activeDayNumber) : 0;
   const paceDeltaWords = totalWords - expectedWords;
-  const daysAheadBehind = dailyPace > 0 ? Math.round(paceDeltaWords / dailyPace) : 0;
+  // Round down to nearest half day.
+  const daysAheadBehind = dailyPace > 0 ? (Math.floor(2.0 * paceDeltaWords / dailyPace) / 2.0) : 0;
 
   const dailyTotals = buildDailyTotals(entries);
 
