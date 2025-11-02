@@ -337,7 +337,7 @@ export class BookComparisonsController {
         item.className = 'book-comparison-modal__item';
         item.innerHTML = `
           <div class="book-comparison-modal__title">${book.title}</div>
-          <div class="book-comparison-modal__meta">${book.author || 'Unknown'} · ${book.words.toLocaleString()} words</div>
+          <div class="book-comparison-modal__meta">by ${book.author || 'Unknown'} · ${book.words.toLocaleString()} words</div>
         `;
         this.modalListEl.appendChild(item);
       });

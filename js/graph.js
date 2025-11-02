@@ -121,7 +121,7 @@ export class GraphController {
             spanGaps: true
           },
           {
-            label: 'Pace Line',
+            label: 'Target',
             data: [],
             borderColor: '#a68968',
             borderDash: [6, 6],
