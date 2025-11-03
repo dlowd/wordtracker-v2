@@ -213,10 +213,10 @@ export const computeProjectMetrics = (snapshot, project, today = new Date()) => 
       const words = dayMap.get(key) || 0;
       if (words >= baselineDailyGoal) {
         currentStreak += 1;
-        cursor = addDays(cursor, -1);
       } else if (cursor != lastEntryDate) {
         break;
       }
+      cursor = addDays(cursor, -1);
     }
   }
 
