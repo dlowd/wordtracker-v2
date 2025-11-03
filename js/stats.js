@@ -214,7 +214,7 @@ export const computeProjectMetrics = (snapshot, project, today = new Date()) => 
       if (words >= baselineDailyGoal) {
         currentStreak += 1;
         cursor = addDays(cursor, -1);
-      } else {
+      } else if (cursor != lastEntryDate) {
         break;
       }
     }
