@@ -203,20 +203,35 @@ export const computeProjectMetrics = (snapshot, project, today = new Date()) => 
   }
 
   let currentStreak = 0;
-  if (dailyTotals.length && baselineDailyGoal > 0) {
+  if (goalWords > 0 && dayPhase.totalDays > 0) {
     const projectStart = startOfDay(project?.startDate);
-    const dayMap = new Map(dailyTotals.map((day) => [day.date, day.delta]));
-    const lastEntryDate = startOfDay(dailyTotals[dailyTotals.length - 1].date);
-    let cursor = lastEntryDate;
-    while (cursor && projectStart && cursor >= projectStart) {
-      const key = getDateKey(cursor);
-      const words = dayMap.get(key) || 0;
-      if (words >= baselineDailyGoal) {
-        currentStreak += 1;
-      } else if (cursor != lastEntryDate) {
-        break;
+    const todayStart = startOfDay(today);
+    if (projectStart && todayStart && todayStart >= projectStart) {
+      const cumulativeMap = new Map(dailyTotals.map((day) => [day.date, day.cumulative]));
+      const deltaMap = new Map(dailyTotals.map((day) => [day.date, day.delta]));
+      let cursor = todayStart;
+      let cursorCumulative = totalWords;
+      while (cursor && cursor >= projectStart) {
+        const key = getDateKey(cursor);
+        if (key && cumulativeMap.has(key)) {
+          cursorCumulative = cumulativeMap.get(key);
+        }
+        const dayIndex = diffInDays(cursor, projectStart);
+        if (dayIndex < 0) {
+          break;
+        }
+        const effectiveDay = Math.min(dayIndex + 1, dayPhase.totalDays);
+        const expectedWordsForDay =
+          dayPhase.totalDays > 0 ? Math.round((goalWords * effectiveDay) / dayPhase.totalDays) : goalWords;
+        if (cursorCumulative >= expectedWordsForDay) {
+          currentStreak += 1;
+        } else if (cursor.getTime() !== todayStart.getTime()) {
+          break;
+        }
+        const wordsOnCursorDay = key && deltaMap.has(key) ? deltaMap.get(key) : 0;
+        cursorCumulative -= wordsOnCursorDay;
+        cursor = addDays(cursor, -1);
       }
-      cursor = addDays(cursor, -1);
     }
   }
 
