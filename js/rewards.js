@@ -57,13 +57,7 @@ const mergeRewardDetails = (reward) => {
   };
 };
 
-const computeMilestoneSize = (goalWords, totalDays) => {
-  const safeGoal = Number.isFinite(goalWords) ? goalWords : 0;
-  const safeDays = Number.isFinite(totalDays) ? totalDays : 0;
-  if (safeGoal <= 0) return 0;
-  if (safeDays <= 0) return safeGoal;
-  return safeGoal / safeDays;
-};
+const WORDS_PER_REWARD = 1000;
 
 const toIsoFromDateKey = (dateKey, fallbackDate) => {
   if (dateKey) {
@@ -158,21 +152,7 @@ const buildMilestoneRewards = ({ projectId, metrics, today }) => {
   }
 
   const totalWords = Number.isFinite(metrics?.totalWords) ? metrics.totalWords : 0;
-  const goalWords = Number.isFinite(metrics?.goalWords) ? metrics.goalWords : 0;
-  const totalDays = Number.isFinite(metrics?.dayPhase?.totalDays)
-    ? metrics.dayPhase.totalDays
-    : 0;
-  const milestoneSize = computeMilestoneSize(goalWords, totalDays);
-
-  if (!milestoneSize || milestoneSize <= 0) {
-    return {
-      milestoneSize,
-      milestoneCount: 0,
-      rewards: [],
-      latest: null
-    };
-  }
-
+  const milestoneSize = WORDS_PER_REWARD;
   const milestoneCount = Math.floor(totalWords / milestoneSize);
   if (milestoneCount <= 0) {
     return {

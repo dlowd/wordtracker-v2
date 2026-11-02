@@ -2,7 +2,7 @@
 
 A NaNoWriMo word-count tracker, live at https://tracker.marylowd.com.
 
-Writers sign in with an emailed magic link. Words, projects, and preferences are stored in Supabase. Each project gets a graph with a pace line. When an earlier project exists, the graph also shows last year's progress. Milestones unlock kitten photos.
+Writers sign in with an emailed magic link. Words, projects, and preferences are stored in Supabase. Each project gets a graph with a pace line. When an earlier project exists, the graph also shows last year's progress. Every 1,000 words unlocks a kitten photo.
 
 ## Develop
 
