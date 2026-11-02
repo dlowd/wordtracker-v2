@@ -153,10 +153,14 @@ export class WordEntryController {
       return;
     }
 
-    if (mode === 'add') {
-      await this.processAddMode(rawValue);
-    } else {
-      await this.processSetMode(rawValue);
+    try {
+      if (mode === 'add') {
+        await this.processAddMode(rawValue);
+      } else {
+        await this.processSetMode(rawValue);
+      }
+    } catch (error) {
+      // Already reported in the status line; the number stays in the box to retry.
     }
   }
 
@@ -173,7 +177,12 @@ export class WordEntryController {
 
     try {
       const result = await this.store.undoLastEntry();
+      if (result.cancelled) {
+        this.updateStatus('Undo canceled.');
+        return;
+      }
       if (!result.entry) {
+        this.state.lastEntry = null;
         this.updateStatus(STATUS_MESSAGES.undoUnavailable);
         return;
       }
@@ -320,6 +329,7 @@ export class WordEntryController {
     } catch (error) {
       console.error('Failed to add words.', error);
       this.updateStatus(STATUS_MESSAGES.error);
+      throw error;
     } finally {
       this.setProcessing(false);
       this.updateUndoAvailability();
@@ -347,6 +357,7 @@ export class WordEntryController {
     try {
       const result = await this.store.setTotal(desiredTotal);
       if (!result.entry) {
+        this.state.totalWords = result.total;
         this.updateStatus('Total unchanged.');
         return;
       }
@@ -366,6 +377,7 @@ export class WordEntryController {
     } catch (error) {
       console.error('Failed to set total.', error);
       this.updateStatus(STATUS_MESSAGES.error);
+      throw error;
     } finally {
       this.setProcessing(false);
       this.updateUndoAvailability();

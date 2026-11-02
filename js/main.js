@@ -5,6 +5,7 @@ import wordDataStore from './data-store.js';
 import { getProject, updateProject } from './project-config.js';
 import createDefaultProject from './project-defaults.js';
 import { computeProjectMetrics, formatMetricsForDisplay, buildDailyTotals } from './stats.js';
+import { buildDayTotals } from './comparison.js';
 import { initProgressSummary } from './progress-summary.js';
 import { initGraph } from './graph.js';
 import { initSettingsModal } from './settings-modal.js';
@@ -41,6 +42,9 @@ const selectors = {
 };
 
 let currentProject = getProject();
+// The project before the current one, with its running totals by day, for the "last year" line.
+let earlierProjects = [];
+let comparison = null;
 const devEditButton = document.querySelector('[data-action="dev-edit"]');
 let entriesEditorController = null;
 
@@ -130,6 +134,7 @@ const defaultFeaturePrefs = {
   quickStatsBar: true,
   rewardsSystem: true,
   bookComparisons: true,
+  lastYearLine: true,
   devFeatures: false
 };
 
@@ -973,7 +978,11 @@ const updateProjectMetrics = () => {
   }
 
   if (graphController) {
-    graphController.update({ snapshot, project: currentProject });
+    graphController.update({
+      snapshot,
+      project: currentProject,
+      comparison: featurePreferences.lastYearLine ? comparison : null
+    });
   }
 
   updateRewardsUI(metrics);
@@ -1154,8 +1163,19 @@ const openImageModal = (reward) => {
   if (imageModalCaption) {
     const displayDate = resolveRewardDisplayDate(reward);
     imageModalCaption.textContent = displayDate
-      ? `Unlocked ${rewardDateFormatter.format(displayDate)}.`
+      ? `Unlocked ${rewardDateFormatter.format(displayDate)}. `
       : '';
+    // The photo licenses require this credit wherever the full image is shown.
+    if (reward.credit) {
+      const credit = document.createElement(reward.source ? 'a' : 'span');
+      credit.textContent = `Photo: ${reward.credit}`;
+      if (reward.source) {
+        credit.href = reward.source;
+        credit.target = '_blank';
+        credit.rel = 'noopener';
+      }
+      imageModalCaption.append(credit);
+    }
   }
   imageModal.removeAttribute('hidden');
   imageModalTitle?.focus();
@@ -1810,7 +1830,10 @@ const initEntriesEditor = () => {
     const dailyTotals = buildDailyTotals(snapshot.entries);
     const totalsMap = new Map(dailyTotals.map((point) => [point.date, point.delta]));
 
-    state.timeline = getProjectTimeline();
+    // Include days outside the project window that have words, or saving would drop them.
+    state.timeline = [...new Set([...getProjectTimeline(), ...dailyTotals.map((point) => point.date)])]
+      .filter(Boolean)
+      .sort();
     state.values = {};
     state.timeline.forEach((dateKey) => {
       state.values[dateKey] = totalsMap.get(dateKey) ?? 0;
@@ -1847,13 +1870,14 @@ const initEntriesEditor = () => {
       }))
       .filter((row) => row.delta !== 0);
 
+    // Insert the corrected rows before deleting the old ones, so a failure can't empty the project.
     try {
-      const { error: deleteError } = await supabase
+      const { data: oldRows, error: loadError } = await supabase
         .from('entries')
-        .delete()
+        .select('id')
         .eq('project_id', currentProject.id);
-      if (deleteError) {
-        throw deleteError;
+      if (loadError) {
+        throw loadError;
       }
 
       if (rows.length) {
@@ -1862,6 +1886,17 @@ const initEntriesEditor = () => {
           .insert(rows);
         if (insertError) {
           throw insertError;
+        }
+      }
+
+      const oldIds = (oldRows || []).map((row) => row.id);
+      if (oldIds.length) {
+        const { error: deleteError } = await supabase
+          .from('entries')
+          .delete()
+          .in('id', oldIds);
+        if (deleteError) {
+          throw deleteError;
         }
       }
 
@@ -2175,10 +2210,11 @@ const persistPreferences = async () => {
   }
 };
 
+// Returns false when the server couldn't be read, so callers don't act on a stale total.
 const refreshEntriesFromSupabase = async () => {
   if (!supabase || !authUser || !currentProject?.id) {
     updateProjectMetrics();
-    return;
+    return true;
   }
   const { data, error } = await supabase
     .from('entries')
@@ -2189,7 +2225,7 @@ const refreshEntriesFromSupabase = async () => {
 
   if (error) {
     console.error('Unable to load entries', error);
-    return;
+    return false;
   }
 
   let cumulative = 0;
@@ -2210,6 +2246,7 @@ const refreshEntriesFromSupabase = async () => {
 
   wordDataStore.replaceState({ total: cumulative, entries });
   updateProjectMetrics();
+  return true;
 };
 
 const overrideWordStoreForSupabase = () => {
@@ -2234,21 +2271,25 @@ const overrideWordStoreForSupabase = () => {
       throw error;
     }
     await refreshEntriesFromSupabase();
-    return wordDataStore.getSnapshot();
+    return { total: wordDataStore.getSnapshot().total, entry: { delta, entry_date: dateKey } };
   };
 
   wordDataStore.setTotal = async (total) => {
     if (!supabase || !authUser || !currentProject?.id) {
       return baseWordStore.setTotal(total);
     }
+    // Another device may have logged words since this page loaded.
+    if (!(await refreshEntriesFromSupabase())) {
+      throw new Error('Could not reach the server. Please try again.');
+    }
     const snapshot = wordDataStore.getSnapshot();
     const target = Number(total);
     if (!Number.isFinite(target)) {
-      return snapshot;
+      return { total: snapshot.total, entry: null };
     }
     const delta = target - snapshot.total;
     if (delta === 0) {
-      return snapshot;
+      return { total: snapshot.total, entry: null };
     }
     const dateKey = getDateKey(new Date());
     if (!dateKey) {
@@ -2263,7 +2304,7 @@ const overrideWordStoreForSupabase = () => {
       throw error;
     }
     await refreshEntriesFromSupabase();
-    return wordDataStore.getSnapshot();
+    return { total: wordDataStore.getSnapshot().total, entry: { delta, entry_date: dateKey } };
   };
 
   wordDataStore.undoLastEntry = async () => {
@@ -2274,7 +2315,7 @@ const overrideWordStoreForSupabase = () => {
     try {
       const { data: lastEntry, error: loadError } = await supabase
         .from('entries')
-        .select('id')
+        .select('id, entry_date, delta')
         .eq('project_id', currentProject.id)
         .order('entry_date', { ascending: false })
         .order('created_at', { ascending: false })
@@ -2286,7 +2327,17 @@ const overrideWordStoreForSupabase = () => {
       }
 
       if (!lastEntry) {
-        return wordDataStore.getSnapshot();
+        return { total: wordDataStore.getSnapshot().total, entry: null };
+      }
+
+      // The newest saved entry may be from an earlier day or another device, so name it first.
+      const when = parseDateKey(lastEntry.entry_date);
+      const whenLabel = when
+        ? when.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+        : lastEntry.entry_date;
+      const amount = `${lastEntry.delta >= 0 ? '' : '−'}${Math.abs(lastEntry.delta).toLocaleString()}`;
+      if (!window.confirm(`Remove the ${amount} words logged on ${whenLabel}?`)) {
+        return { total: wordDataStore.getSnapshot().total, entry: null, cancelled: true };
       }
 
       const { error: deleteError } = await supabase
@@ -2299,7 +2350,7 @@ const overrideWordStoreForSupabase = () => {
       }
 
       await refreshEntriesFromSupabase();
-      return wordDataStore.getSnapshot();
+      return { total: wordDataStore.getSnapshot().total, entry: lastEntry };
     } catch (error) {
       console.error('Unable to undo last entry', error);
       throw error;
@@ -2431,7 +2482,19 @@ const loadPreferencesForUser = async () => {
   updateProjectMetrics();
 };
 
+const projectFromRow = (row) => ({
+  id: row.id,
+  name: row.name,
+  goal: row.goal,
+  startDate: row.start_date,
+  endDate: row.end_date
+});
+
+// Days before the next default project starts when a finished project gets replaced.
+const NEW_PROJECT_LEAD_DAYS = 14;
+
 const loadProjectForUser = async () => {
+  earlierProjects = [];
   if (!supabase || !authUser) {
     currentProject = createDefaultProject();
     setProjectPreference(currentProject);
@@ -2443,23 +2506,33 @@ const loadProjectForUser = async () => {
     .from('projects')
     .select('*')
     .eq('user_id', authUser.id)
-    .order('created_at', { ascending: true })
-    .limit(1)
-    .maybeSingle();
+    .order('start_date', { ascending: true })
+    .order('created_at', { ascending: true });
 
-  if (error && error.code !== 'PGRST116') {
+  if (error) {
     console.error('Unable to load project', error);
     return null;
   }
 
-  if (!data) {
-    const defaults = createDefaultProject();
+  const projects = (data || []).map(projectFromRow);
+  const latest = projects[projects.length - 1] || null;
+
+  // Keep a finished project on screen until the next one is near, then start a fresh
+  // project beside it so the old one stays available for comparison.
+  const defaults = createDefaultProject();
+  const todayKey = getDateKey(new Date());
+  const newProjectFrom = getDateKey(addDays(defaults.startDate, -NEW_PROJECT_LEAD_DAYS));
+  const needsNewProject =
+    !latest ||
+    (latest.endDate < todayKey && defaults.startDate > latest.endDate && todayKey >= newProjectFrom);
+
+  if (needsNewProject) {
     const { data: inserted, error: insertError } = await supabase
       .from('projects')
       .insert({
         user_id: authUser.id,
         name: defaults.name,
-        goal: defaults.goal,
+        goal: latest?.goal || defaults.goal,
         start_date: defaults.startDate,
         end_date: defaults.endDate
       })
@@ -2468,28 +2541,45 @@ const loadProjectForUser = async () => {
 
     if (insertError) {
       console.error('Unable to create project', insertError);
-      return null;
+      if (!latest) {
+        return null;
+      }
+    } else {
+      projects.push(projectFromRow(inserted));
     }
-    currentProject = {
-      id: inserted.id,
-      name: inserted.name,
-      goal: inserted.goal,
-      startDate: inserted.start_date,
-      endDate: inserted.end_date
-    };
-  } else {
-    currentProject = {
-      id: data.id,
-      name: data.name,
-      goal: data.goal,
-      startDate: data.start_date,
-      endDate: data.end_date
-    };
   }
+
+  currentProject = projects[projects.length - 1];
+  earlierProjects = projects.slice(0, -1);
 
   setProjectPreference(currentProject);
   ensureHeaderDefaults();
   return currentProject;
+};
+
+// Compare against the most recent earlier project that has words. Some accounts have
+// empty duplicate projects from 2025, created alongside the real one.
+const loadComparison = async () => {
+  comparison = null;
+  if (!supabase || !authUser) {
+    return;
+  }
+  for (const project of [...earlierProjects].reverse()) {
+    const { data, error } = await supabase
+      .from('entries')
+      .select('entry_date, delta')
+      .eq('project_id', project.id);
+
+    if (error) {
+      console.error('Unable to load the previous project for comparison', error);
+      return;
+    }
+    const dayTotals = buildDayTotals(project, data || []);
+    if (dayTotals.length && dayTotals[dayTotals.length - 1] > 0) {
+      comparison = { project, dayTotals };
+      return;
+    }
+  }
 };
 
 const loadUserData = async () => {
@@ -2515,12 +2605,15 @@ const loadUserData = async () => {
   }
 
   overrideWordStoreForSupabase();
+  await loadComparison();
   await refreshEntriesFromSupabase();
   await refreshRewardsFromSupabase();
   updateRewardsUI(latestMetrics);
 };
 
 const clearUserData = () => {
+  earlierProjects = [];
+  comparison = null;
   restoreBaseWordStore();
   baseWordStore.reset();
   Object.assign(optionalStatIds, defaultOptionalStats);
@@ -2587,10 +2680,19 @@ const initAuth = async () => {
     toggleAuthUI(null);
     return;
   }
-  const { data } = await supabase.auth.getSession();
-  await applyAuthState(data?.session?.user || null);
-  supabase.auth.onAuthStateChange(async (_event, session) => {
-    await applyAuthState(session?.user || null);
+  const { data, error } = await supabase.auth.getSession();
+  if (error && !data?.session) {
+    // Usually a failed token refresh while offline; signing out here would wipe cached prefs.
+    toggleAuthUI(null);
+    if (authFeedback) {
+      authFeedback.textContent = 'Can’t reach the server. Check your connection and reload.';
+    }
+  } else {
+    await applyAuthState(data?.session?.user || null);
+  }
+  // Supabase can deadlock if its own calls are awaited inside this callback, so defer.
+  supabase.auth.onAuthStateChange((_event, session) => {
+    window.setTimeout(() => applyAuthState(session?.user || null), 0);
   });
 };
 
@@ -2604,6 +2706,13 @@ const registerDataListeners = () => {
 
   window.addEventListener(wordDataStore.events.entryAdded, onDataChanged);
   window.addEventListener(wordDataStore.events.entryUndone, onDataChanged);
+
+  // A tab left open overnight or behind another device's update should catch up when shown.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && authUser) {
+      refreshEntriesFromSupabase();
+    }
+  });
 
   dataListenersRegistered = true;
 };

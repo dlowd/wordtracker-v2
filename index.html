@@ -89,10 +89,9 @@
               </button>
             </div>
           </form>
-					<!--
           <p class="word-entry__status" role="status" aria-live="polite" data-entry-status>
             Enter your words to see progress updates here.
-					</p> -->
+          </p>
         </div>
       </section>
       <div class="main-dashboard">
@@ -185,6 +184,7 @@
               </p>
             </div>
           </section>
+          <p class="graph-compare" data-graph-compare hidden></p>
           <section class="book-comparisons" data-book-comparisons hidden aria-label="Book comparisons">
             <div class="book-comparisons__header" data-book-comparisons-header>
               <h2 class="book-comparisons__title">Book Comparisons</h2>
@@ -232,7 +232,7 @@
         <p class="auth-form__feedback" data-auth-feedback aria-live="polite"></p>
       </form>
       <p class="auth-overlay__footer">
-        Need access? Contact the project owner to be added to the beta.
+        New here? Enter your email and the link will set up your account.
       </p>
     </div>
   </div>
@@ -337,6 +337,10 @@
               <span>Book Comparisons</span>
             </label>
             <label class="settings-checkbox">
+              <input type="checkbox" data-feature-toggle="lastYearLine" checked>
+              <span>Last year’s progress on the graph</span>
+            </label>
+            <label class="settings-checkbox">
               <input type="checkbox" data-feature-toggle="rewardsSystem" checked>
               <span>Milestone Rewards (kitten gallery)</span>
             </label>
@@ -391,7 +395,7 @@
         <button type="button" class="entries-modal__close" aria-label="Close editor" data-entries-dismiss>&times;</button>
       </header>
       <div class="entries-modal__body">
-        <p class="entries-modal__intro">Adjust each day’s total words added. Saving will append the necessary corrections.</p>
+        <p class="entries-modal__intro">Adjust the words logged on each day. Saving replaces this project’s entries with these numbers.</p>
         <div class="entries-grid" data-entries-grid></div>
         <p class="entries-modal__hint">Totals are per day. Negative numbers remove words; positive numbers add them.</p>
       </div>

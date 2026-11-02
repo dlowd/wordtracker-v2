@@ -50,6 +50,8 @@ const mergeRewardDetails = (reward) => {
     pack: manifest.pack,
     image: manifest.image,
     label: manifest.label,
+    credit: manifest.credit,
+    source: manifest.source,
     message: reward.message ?? manifest.message,
     unlockedAt: reward.unlockedAt || new Date().toISOString()
   };

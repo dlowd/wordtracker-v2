@@ -233,8 +233,10 @@ export class SettingsModal {
       goal: this.projectGoalInput ? Number(this.projectGoalInput.value) : 0
     };
 
-    const feedback = this.onProjectSubmit(payload);
-    this.showProjectFeedback(feedback);
+    // Signed-in saves return a Promise; wait for the server before saying it worked.
+    Promise.resolve(this.onProjectSubmit(payload))
+      .catch(() => ({ success: false, message: 'Could not save project. Please try again.' }))
+      .then((feedback) => this.showProjectFeedback(feedback));
   }
 
   showProjectFeedback(feedback) {

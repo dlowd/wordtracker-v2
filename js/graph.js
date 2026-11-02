@@ -1,5 +1,6 @@
 import { formatNumber, buildDailyTotals } from './stats.js';
 import { startOfDay, diffInDays, getDateKey, addDays } from './date-utils.js';
+import { describePastProject, describeComparison, totalOnDay } from './comparison.js';
 
 const buildLabels = (data) => {
   const formatter = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
@@ -59,10 +60,11 @@ const buildPaceSeries = (labels, project) => {
 };
 
 export class GraphController {
-  constructor({ root, canvas, placeholder }) {
+  constructor({ root, canvas, placeholder, compare }) {
     this.root = root;
     this.canvas = canvas;
     this.placeholder = placeholder;
+    this.compare = compare;
     this.chart = null;
     this.isInitialized = false;
   }
@@ -129,6 +131,17 @@ export class GraphController {
             borderWidth: 2,
             pointRadius: 0,
             spanGaps: true
+          },
+          {
+            label: 'Last year',
+            data: [],
+            borderColor: 'rgba(124, 58, 237, 0.7)',
+            backgroundColor: 'rgba(124, 58, 237, 0.7)',
+            tension: 0.3,
+            borderWidth: 2,
+            pointRadius: 0,
+            pointHitRadius: 8,
+            spanGaps: true
           }
         ]
       },
@@ -151,7 +164,10 @@ export class GraphController {
         plugins: {
           legend: {
             display: true,
-            position: 'bottom'
+            position: 'bottom',
+            labels: {
+              filter: (item, data) => data.datasets[item.datasetIndex]?.data?.length > 0
+            }
           },
           tooltip: {
             intersect: false,
@@ -179,13 +195,20 @@ export class GraphController {
     `;
   }
 
-  update({ snapshot, project }) {
+  setCompareText(text) {
+    if (!this.compare) return;
+    this.compare.textContent = text || '';
+    this.compare.hidden = !text;
+  }
+
+  update({ snapshot, project, comparison }) {
     if (!this.placeholder || !this.root) return;
 
     const data = buildDailyTotals(snapshot?.entries);
     const timeline = buildTimeline(project, data);
 
     if (!timeline.length) {
+      this.setCompareText('');
       this.root.classList.remove('graph-visual--active');
       this.setPlaceholder(
         'Start logging words to visualize your progress.',
@@ -212,6 +235,25 @@ export class GraphController {
       return lastValue;
     });
 
+    // Past project's running total, lined up by day of project rather than calendar date.
+    const projectStart = startOfDay(project?.startDate) || labels[0].raw;
+    const past = comparison?.dayTotals?.length ? comparison : null;
+    const pastNames = past ? describePastProject(past.project, project) : null;
+    const pastSeries = past
+      ? labels.map(({ raw }) => totalOnDay(past.dayTotals, diffInDays(raw, projectStart)))
+      : [];
+    this.setCompareText(
+      past
+        ? describeComparison({
+            lead: pastNames.lead,
+            dayTotals: past.dayTotals,
+            dayIndex: diffInDays(new Date(), projectStart),
+            totalDays: timeline.length,
+            currentTotal: latestTotal
+          })
+        : ''
+    );
+
     const chart = this.ensureChart();
     if (!chart) {
       this.root.classList.remove('graph-visual--active');
@@ -226,14 +268,18 @@ export class GraphController {
     chart.data.labels = labels.map((l) => l.display);
     chart.data.datasets[0].data = totalSeries;
     chart.data.datasets[1].data = paceSeries;
+    chart.data.datasets[2].data = pastSeries;
+    chart.data.datasets[2].label = pastNames ? pastNames.legend : 'Last year';
     const goalMax = Number.isFinite(project?.goal) ? project.goal : 0;
     const numericTotals = totalSeries.filter((value) => Number.isFinite(value));
     const numericPace = paceSeries.filter((value) => Number.isFinite(value));
+    const numericPast = pastSeries.filter((value) => Number.isFinite(value));
     const maxValue = Math.max(
       0,
       goalMax,
       ...(numericTotals.length ? numericTotals : [0]),
-      ...(numericPace.length ? numericPace : [0])
+      ...(numericPace.length ? numericPace : [0]),
+      ...(numericPast.length ? numericPast : [0])
     );
     if (chart.options?.scales?.y) {
       chart.options.scales.y.suggestedMax = maxValue;
@@ -261,11 +307,13 @@ export const initGraph = () => {
 
   const canvas = root.querySelector('[data-graph-canvas]');
   const placeholder = root.querySelector('[data-graph-placeholder]');
+  const compare = document.querySelector('[data-graph-compare]');
 
   return new GraphController({
     root,
     canvas,
-    placeholder
+    placeholder,
+    compare
   });
 };
 

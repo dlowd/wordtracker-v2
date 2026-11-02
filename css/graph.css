@@ -11,6 +11,17 @@
   overflow: hidden;
 }
 
+.graph-compare {
+  margin: 0;
+  text-align: center;
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
+.graph-compare[hidden] {
+  display: none;
+}
+
 .graph-visual__canvas {
   width: 100%;
   max-width: 100%;

@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from '@supabase/supabase-js';
 
 const env = import.meta.env || {};
 const supabaseUrl = env.VITE_SUPABASE_URL || window.__SUPABASE_URL__ || '';
